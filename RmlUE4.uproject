@@ -1,0 +1,13 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "{7E7A74BA-4921-4D74-FE7E-329CA0D5D00A}",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "RmlUE4",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}

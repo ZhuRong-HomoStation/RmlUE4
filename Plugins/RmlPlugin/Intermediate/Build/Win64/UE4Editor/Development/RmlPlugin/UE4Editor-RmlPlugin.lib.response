@@ -1,0 +1,13 @@
+/NOLOGO
+/errorReport:prompt
+/MACHINE:x64
+/SUBSYSTEM:WINDOWS
+/DEF
+/NAME:"UE4Editor-RmlPlugin.dll"
+/IGNORE:4221
+/NODEFAULTLIB
+"C:\Users\BenzzZX\Desktop\Development\RmlUE4\Intermediate\Build\Win64\RmlUE4Editor\Development\Engine\SharedPCH.Engine.ShadowErrors.h.obj"
+"C:\Users\BenzzZX\Desktop\Development\RmlUE4\Plugins\RmlPlugin\Intermediate\Build\Win64\UE4Editor\Development\RmlPlugin\RmlPlugin.cpp.obj"
+"C:\Users\BenzzZX\Desktop\Development\RmlUE4\Plugins\RmlPlugin\Intermediate\Build\Win64\UE4Editor\Development\RmlPlugin\Default.rc2.res"
+/OUT:"C:\Users\BenzzZX\Desktop\Development\RmlUE4\Plugins\RmlPlugin\Intermediate\Build\Win64\UE4Editor\Development\RmlPlugin\UE4Editor-RmlPlugin.lib"
+/INCLUDE:IMPLEMENT_MODULE_RmlPlugin
