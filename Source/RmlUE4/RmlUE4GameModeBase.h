@@ -13,5 +13,8 @@ UCLASS()
 class RMLUE4_API ARmlUE4GameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
+public:
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	
 };

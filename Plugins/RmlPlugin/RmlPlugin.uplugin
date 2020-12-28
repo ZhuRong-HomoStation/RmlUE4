@@ -16,7 +16,12 @@
 	"Installed": false,
 	"Modules": [
 		{
-			"Name": "RmlPlugin",
+			"Name": "RmlUI",
+			"Type": "Program",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "UERmlUI",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
 		}
