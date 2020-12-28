@@ -74,4 +74,12 @@ Intermediate/*
 # Cache files for the editor to use
 DerivedDataCache/*
 
+# Plugin binaries and temp files 
+Plugins/RmlPlugin/Binaries/*
+Plugins/RmlPlugin/Intermediate/*
+
+# We won't use VR
+Config/steamVRBindings/*
+Config/steamvr_ue_editor_app.json
+
 Source/Noesis/NoesisSDK/*
