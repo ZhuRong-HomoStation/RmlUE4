@@ -11,20 +11,19 @@
 Rml::Context* RmlCtx = nullptr;
 FUERmlSystemInterface	SystemInterface;
 FUERmlRenderInterface	RenderInterface;
-FUERmlFontInterface		FontInterface;
 
 void FUERmlUI::StartupModule()
 {
 	// init interface
 	Rml::SetSystemInterface(&SystemInterface);
 	Rml::SetRenderInterface(&RenderInterface);
-	Rml::SetFontEngineInterface(&FontInterface);
-
+	
 	// Initialize 
-	Rml::Initialise();
+	check(Rml::Initialise());
 
 	// create context 
 	RmlCtx = Rml::CreateContext("Default", Rml::Vector2i(100, 100));
+	check(RmlCtx);
 }
 
 void FUERmlUI::ShutdownModule()

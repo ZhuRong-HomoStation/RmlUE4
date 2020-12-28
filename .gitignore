@@ -82,4 +82,9 @@ Plugins/RmlPlugin/Intermediate/*
 Config/steamVRBindings/*
 Config/steamvr_ue_editor_app.json
 
+# Don't ignore binary in Thirdparty
+!Plugins/RmlPlugin/Source/ThirdParty/RmlUI/*
+!Plugins/RmlPlugin/Source/ThirdParty/RmlUI/Win/*/*/*.lib
+!Plugins/RmlPlugin/Source/ThirdParty/RmlUI/Win/*/*/*.dll
+
 Source/Noesis/NoesisSDK/*
