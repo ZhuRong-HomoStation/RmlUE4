@@ -23,6 +23,7 @@ public class UERmlUI : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
+				"ApplicationCore"
 			});
 	}
 }
