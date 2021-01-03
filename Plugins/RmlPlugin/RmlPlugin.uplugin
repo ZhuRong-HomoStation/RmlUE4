@@ -23,7 +23,7 @@
 		{
 			"Name": "UERmlUI",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "PostConfigInit"
 		}
 	]
 }

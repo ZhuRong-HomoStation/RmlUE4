@@ -1,5 +1,5 @@
 ﻿#include "RmlInterface/UERmlRenderInterface.h"
-#include "RmlUi/Core/Types.h"
+#include "RmlUi/Core.h"
 
 FUERmlRenderInterface::FUERmlRenderInterface()
 {
@@ -43,7 +43,7 @@ bool FUERmlRenderInterface::GenerateTexture(Rml::TextureHandle& texture_handle, 
 
 void FUERmlRenderInterface::ReleaseTexture(Rml::TextureHandle texture)
 {
-	// 释放UTexture2D 
+	// 释放UTexture2D 	
 }
 
 void FUERmlRenderInterface::SetTransform(const Rml::Matrix4f* transform)

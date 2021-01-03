@@ -1,0 +1,46 @@
+#include "/Engine/Public/Platform.ush"
+
+Texture2D		InTexture;
+SamplerState	InTextureSampler;
+float4x4		InTransform;
+
+struct InputVS
+{
+	float2	Position	: ATTRIBUTE0;
+	float2	UV			: ATTRIBUTE2;
+	float4	Color		: ATTRIBUTE1;
+};
+
+struct OutputVS
+{
+	float4	Position	: SV_POSITION;
+	float4	Color		: TEXCOORD0;
+	float2	UV			: TEXCOORD1;
+};
+
+struct OutputPS
+{
+	float4	Color		: SV_Target0;
+};
+
+OutputVS RmlShader_VS(InputVS In)
+{
+	OutputVS Out;
+
+	Out.Position = mul(In.Position, InTransform);
+	Out.UV = In.UV;
+	Out.Color = In.Color;
+
+	return Out;
+}
+
+OutputPS RmlShader_PS(OutputVS In)
+{
+	OutputPS Out;
+
+	Out.Color = In.Color * InTexture.Sample(InTextureSampler, In.UV);
+	
+	return Out;
+}
+
+

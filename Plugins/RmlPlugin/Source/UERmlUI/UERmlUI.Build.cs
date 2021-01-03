@@ -12,8 +12,9 @@ public class UERmlUI : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"Core",
+				"Core" ,
 				"RmlUI" ,
+				"RHI" ,
 			});
 			
 		PrivateDependencyModuleNames.AddRange(
@@ -23,7 +24,9 @@ public class UERmlUI : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
-				"ApplicationCore"
+				"ApplicationCore" ,
+				"Projects" ,
+				"RenderCore" ,
 			});
 	}
 }
