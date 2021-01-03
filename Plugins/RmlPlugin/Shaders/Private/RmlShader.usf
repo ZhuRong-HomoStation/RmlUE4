@@ -27,7 +27,7 @@ OutputVS RmlShader_VS(InputVS In)
 {
 	OutputVS Out;
 
-	Out.Position = mul(In.Position, InTransform);
+	Out.Position = mul(float4(In.Position, 0, 1), InTransform);
 	Out.UV = In.UV;
 	Out.Color = In.Color;
 

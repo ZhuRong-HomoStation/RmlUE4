@@ -15,6 +15,7 @@ public:
 
 	void BuildMesh();
 	void ReleaseMesh();
+	void DrawMesh(FRHICommandList& RHICmdList);
 private:
 	void BuildMesh_RenderThread();
 
@@ -24,4 +25,7 @@ public:
 
 	TResourceArray<uint16>			Indices;
 	FIndexBufferRHIRef				IndexBufferRHI;
+
+	int32							NumVertices;
+	int32							NumTriangles;
 };

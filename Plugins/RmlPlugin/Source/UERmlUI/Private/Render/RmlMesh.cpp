@@ -3,6 +3,7 @@
 void FRmlMesh::BuildMesh()
 {
 	if (Vertices.Num() == 0 || Indices.Num() == 0) return;
+	check(Indices.Num() % 3 == 0);
 	if (IsInRenderingThread())
 	{
 		BuildMesh_RenderThread();
@@ -14,6 +15,7 @@ void FRmlMesh::BuildMesh()
             BuildMesh_RenderThread();
         });
 	}
+	
 }
 
 void FRmlMesh::ReleaseMesh()
@@ -22,8 +24,19 @@ void FRmlMesh::ReleaseMesh()
 	IndexBufferRHI.SafeRelease();
 }
 
+void FRmlMesh::DrawMesh(FRHICommandList& RHICmdList)
+{
+	check(IsInRenderingThread());
+
+	RHICmdList.SetStreamSource(0, VertexBufferRHI, 0);
+	RHICmdList.DrawIndexedPrimitive(IndexBufferRHI, 0, 0, NumVertices, 0, NumTriangles, 1);
+}
+
 void FRmlMesh::BuildMesh_RenderThread()
 {
+	NumVertices = Vertices.Num();
+	NumTriangles = Indices.Num() / 3;
+	
 	FRHIResourceCreateInfo VtxInfo;
 	VtxInfo.ResourceArray = &Vertices;
 	int32 VerticesBufferSize = sizeof(FVertexData) * Vertices.Num();

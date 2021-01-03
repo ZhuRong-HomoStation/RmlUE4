@@ -1,6 +1,8 @@
 ﻿#pragma once
 #include "RmlUi/Core/RenderInterface.h"
 
+class FRmlMesh;
+
 class UERMLUI_API FUERmlRenderInterface : public Rml::RenderInterface
 {
 public:
@@ -36,4 +38,6 @@ protected:
 	FMatrix				RenderMatrix;
 	bool				bUseClipRect;
 	FSlateClippingZone	ClipZone;
+
+	TArray<TSharedPtr<FRmlMesh*>>	Meshes;
 };
