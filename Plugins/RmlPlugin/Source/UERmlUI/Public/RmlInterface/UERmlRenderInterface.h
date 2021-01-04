@@ -10,6 +10,9 @@ class UERMLUI_API FUERmlRenderInterface : public Rml::RenderInterface
 public:
 	FUERmlRenderInterface();
 
+	bool SetTexture(FString Path, UTexture* InTexture, bool bAddIfNotExist = true);
+	const TArray<TSharedPtr<FRmlTextureEntry, ESPMode::ThreadSafe>>& GetCreatedTextures() { return AllCreatedTextures; }
+	
 protected:
 	// ~Begin Rml::RenderInterface API
 	virtual Rml::CompiledGeometryHandle CompileGeometry(
@@ -46,7 +49,13 @@ protected:
 	bool				bUseClipRect;
 	FSlateClippingZone	ClipZone;
 
+	// textures 
+	TMap<FString, TSharedPtr<FRmlTextureEntry, ESPMode::ThreadSafe>>	AllTextures;
+	TArray<TSharedPtr<FRmlTextureEntry, ESPMode::ThreadSafe>>			AllCreatedTextures;
+
+	// meshes 
 	TArray<TSharedPtr<FRmlMesh, ESPMode::ThreadSafe>>		Meshes;
-	TArray<TSharedPtr<FTextureEntry, ESPMode::ThreadSafe>>	AllTextures;
+
+	// drawers 
 	TArray<TSharedPtr<FRmlDrawer, ESPMode::ThreadSafe>>		AllDrawers;
 };

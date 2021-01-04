@@ -2,20 +2,22 @@
 #include "Engine/Texture2D.h"
 #include "Engine/TextureRenderTarget2D.h"
 
-FTextureEntry::FTextureEntry(UTexture* InTexture)
+FRmlTextureEntry::FRmlTextureEntry(UTexture* InTexture, FString InTexturePath)
+	: BoundTexture(InTexture)
+	, TexturePath(InTexturePath)
 {
 }
 
-FTextureEntry::~FTextureEntry()
+FRmlTextureEntry::~FRmlTextureEntry()
 {
 }
 
-FRHITexture2D* FTextureEntry::GetTextureRHI()
+FRHITexture2D* FRmlTextureEntry::GetTextureRHI()
 {
 	return BoundTexture->Resource ? BoundTexture->Resource->TextureRHI->GetTexture2D() : nullptr;
 }
 
-void FTextureEntry::AddReferencedObjects(FReferenceCollector& Collector)
+void FRmlTextureEntry::AddReferencedObjects(FReferenceCollector& Collector)
 {
 	if (BoundTexture)
 	{

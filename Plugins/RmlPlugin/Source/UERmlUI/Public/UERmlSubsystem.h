@@ -5,7 +5,7 @@
 #include "UObject/Object.h"
 #include "UERmlSubsystem.generated.h"
 
-class FTextureEntry;
+class FRmlTextureEntry;
 
 UCLASS()
 class UERMLUI_API UUERmlSubsystem : public UEngineSubsystem
@@ -14,10 +14,7 @@ class UERMLUI_API UUERmlSubsystem : public UEngineSubsystem
 public:
 	UUERmlSubsystem* Get() { return GEngine->GetEngineSubsystem<UUERmlSubsystem>(); }
 
-	void SetImportTexture(FString Name, UTexture* InTexture);
-	UTexture* GetImportTexture(FString Name);
-	void RemoveImportTexture(FString Name);
-
+	
 	FUERmlSystemInterface& GetRmlSystemInterface() { return RmlSystemInterface; }
 	FUERmlRenderInterface& GetRmlRenderInterface() { return RmlRenderInterface; }
 protected:
@@ -26,8 +23,7 @@ protected:
 	virtual void Deinitialize() override;
 	// ~End UEngineSubsystem API 
 private:
-	TMap<FString, TSharedPtr<FTextureEntry, ESPMode::ThreadSafe>>		AllImportTextures;
-
+	// interface 
 	FUERmlSystemInterface			RmlSystemInterface;
 	FUERmlRenderInterface			RmlRenderInterface;
 };

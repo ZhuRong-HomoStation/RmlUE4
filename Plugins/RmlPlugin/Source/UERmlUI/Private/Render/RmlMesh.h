@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-class FTextureEntry;
+class FRmlTextureEntry;
 
 class FRmlMesh : public TSharedFromThis<FRmlMesh, ESPMode::ThreadSafe>
 {
@@ -31,5 +31,5 @@ public:
 	int32							NumVertices;
 	int32							NumTriangles;
 
-	TSharedPtr<FTextureEntry, ESPMode::ThreadSafe>			BoundTexture;
+	TSharedPtr<FRmlTextureEntry, ESPMode::ThreadSafe>			BoundTexture;
 };

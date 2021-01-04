@@ -8,8 +8,24 @@ FUERmlRenderInterface::FUERmlRenderInterface()
 {
 }
 
+bool FUERmlRenderInterface::SetTexture(FString Path, UTexture* InTexture, bool bAddIfNotExist)
+{
+	auto FoundTexture = AllTextures.Find(Path);
+	if (FoundTexture)
+	{
+		(*FoundTexture)->BoundTexture = InTexture;
+		return true;
+	}
+	else if (bAddIfNotExist)
+	{
+		AllTextures.Add(Path, MakeShared<FRmlTextureEntry, ESPMode::ThreadSafe>(InTexture));
+		return true;
+	}
+	return false;
+}
+
 Rml::CompiledGeometryHandle FUERmlRenderInterface::CompileGeometry(Rml::Vertex* vertices, int num_vertices,
-	int* indices, int num_indices, Rml::TextureHandle texture)
+																   int* indices, int num_indices, Rml::TextureHandle texture)
 {
 	TSharedPtr<FRmlMesh, ESPMode::ThreadSafe> Mesh = (new FRmlMesh())->AsShared();
 
@@ -42,7 +58,7 @@ Rml::CompiledGeometryHandle FUERmlRenderInterface::CompileGeometry(Rml::Vertex* 
 	// set up texture
 	if (texture != NULL)
 	{
-		Mesh->BoundTexture = reinterpret_cast<FTextureEntry*>(texture)->AsShared();
+		Mesh->BoundTexture = reinterpret_cast<FRmlTextureEntry*>(texture)->AsShared();
 	}
 	
 	// add to array
@@ -80,7 +96,33 @@ void FUERmlRenderInterface::ReleaseCompiledGeometry(Rml::CompiledGeometryHandle 
 bool FUERmlRenderInterface::LoadTexture(Rml::TextureHandle& texture_handle, Rml::Vector2i& texture_dimensions,
 	const Rml::String& source)
 {
-	// 加载UTexture2D 
+	FString Path(source.c_str());
+	auto FoundTexture = AllTextures.Find(Path);
+	if (FoundTexture)
+	{
+		texture_handle = reinterpret_cast<Rml::TextureHandle>((*FoundTexture).Get());
+		return true;
+	}
+	else
+	{
+		TArray<FString> PathNodes;
+		Path.ParseIntoArray(PathNodes, TEXT("/"));
+		if (PathNodes.Num() == 0) return false;
+		if (PathNodes[0].EndsWith(TEXT(":")) || PathNodes[0] == TEXT(".") || PathNodes[0] == TEXT(".."))
+		{
+			// TODO system path
+			return true;
+		}
+		else
+		{
+			UObject* LoadedObj = StaticLoadObject(UTexture2D::StaticClass(), GetTransientPackage(), nullptr, *Path);
+			if (!LoadedObj) return false;
+			auto& AddedTexture = AllTextures.Add(Path, MakeShared<FRmlTextureEntry, ESPMode::ThreadSafe>((UTexture*)LoadedObj, Path));
+			texture_handle = reinterpret_cast<Rml::TextureHandle>(AddedTexture.Get());
+			return true;
+		}
+	}
+	
 	return false;
 }
 
@@ -101,7 +143,15 @@ bool FUERmlRenderInterface::GenerateTexture(Rml::TextureHandle& texture_handle, 
 
 void FUERmlRenderInterface::ReleaseTexture(Rml::TextureHandle texture)
 {
-	AllTextures.RemoveSwap(reinterpret_cast<FTextureEntry*>(texture)->AsShared());
+	FRmlTextureEntry* Entry = reinterpret_cast<FRmlTextureEntry*>(texture);
+	if (Entry->TexturePath.IsEmpty())
+	{
+		AllCreatedTextures.RemoveSwap(Entry->AsShared());
+	}
+	else
+	{
+		AllTextures.Remove(Entry->TexturePath);
+	}
 }
 
 void FUERmlRenderInterface::SetTransform(const Rml::Matrix4f* transform)

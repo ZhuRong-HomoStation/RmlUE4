@@ -5,15 +5,14 @@
 class FRHITexture2D;
 class UTexture;
 
-class FTextureEntry : public FGCObject, public TSharedFromThis<FTextureEntry, ESPMode::ThreadSafe>
+class FRmlTextureEntry : public FGCObject, public TSharedFromThis<FRmlTextureEntry, ESPMode::ThreadSafe>
 {
 public:
-	FTextureEntry(UTexture* InTexture = nullptr);
-	virtual ~FTextureEntry();
+	FRmlTextureEntry(UTexture* InTexture = nullptr, FString InTexturePath = FString());
+	virtual ~FRmlTextureEntry();
 	virtual FRHITexture2D* GetTextureRHI();
-	virtual	UTexture* GetTexture() { return BoundTexture; }
-	
 	virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
-private:
-	UTexture*		BoundTexture;	
+public:
+	UTexture*		BoundTexture;
+	FString			TexturePath;
 };
