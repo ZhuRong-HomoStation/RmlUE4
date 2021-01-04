@@ -28,6 +28,7 @@ public class UERmlUI : ModuleRules
 				"Projects" ,
 				"RenderCore" ,
 				"InputCore" ,
+				"ImageWrapper" ,
 			});
 	}
 }

@@ -18,6 +18,8 @@ public:
 	void BuildMesh();
 	void ReleaseMesh();
 	void DrawMesh(FRHICommandList& RHICmdList);
+
+	static FVertexDeclarationRHIRef GetMeshDeclaration();
 private:
 	void BuildMesh_RenderThread();
 

@@ -2,6 +2,7 @@
 
 #include "RmlHelper.h"
 #include "UERmlSubsystem.h"
+#include "Widgets/Layout/SConstraintCanvas.h"
 
 void SRmlWidget::Construct(const FArguments& InArgs)
 {
@@ -13,8 +14,30 @@ SRmlWidget::~SRmlWidget()
 	Rml::RemoveContext(BoundContext->GetName());
 }
 
+bool SRmlWidget::AddToViewport(UWorld* InWorld, int32 ZOrder)
+{
+	// get game view port 
+	UGameViewportClient* ViewportClient = InWorld->GetGameViewport();
+	if (!ViewportClient) return false;
+
+	// add to view port 
+	ViewportClient->AddViewportWidgetContent(this->AsShared(), ZOrder + 10);
+
+	return true;
+}
+
 void SRmlWidget::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
 {
+	// update size 
+	FVector2D CurSizeUE = AllottedGeometry.GetAbsoluteSize();
+	Rml::Vector2i CurSize((int)CurSizeUE.X, (int)CurSizeUE.Y);
+	Rml::Vector2i LastSize = BoundContext->GetDimensions();
+	if (CurSize != LastSize)
+	{
+		BoundContext->SetDimensions(CurSize);
+	}
+
+	// call update 
 	BoundContext->Update();
 }
 
@@ -28,9 +51,16 @@ int32 SRmlWidget::OnPaint(
 	bool bParentEnabled) const
 {
 	auto& RenderInterface = UUERmlSubsystem::Get()->GetRmlRenderInterface();
-	
+
+	auto Size = AllottedGeometry.GetAbsoluteSize();
 	RenderInterface.CurrentElementList = &OutDrawElements;
 	RenderInterface.CurrentLayer = LayerId;
+	RenderInterface.CurrentRenderMatrix = AllottedGeometry.GetAccumulatedRenderTransform().To3DMatrix();
+	RenderInterface.CurrentRenderMatrix *= FMatrix(
+			FPlane(1.0f / Size.X,0.0f,			0.0f,		0.0f),
+			FPlane(0.0f,			1.0f / Size.Y,	0.0f,		0.0f),
+			FPlane(0.0f,			0.0f,			1,			0.0f),
+			FPlane(-0.5f,		-0.5f,			0,			1.0f));
 	BoundContext->Render();
 	
 	return LayerId + 1;

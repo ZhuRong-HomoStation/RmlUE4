@@ -14,7 +14,6 @@ class UERMLUI_API UUERmlSubsystem : public UEngineSubsystem
 public:
 	static UUERmlSubsystem* Get() { return GEngine->GetEngineSubsystem<UUERmlSubsystem>(); }
 
-	
 	FUERmlSystemInterface& GetRmlSystemInterface() { return RmlSystemInterface; }
 	FUERmlRenderInterface& GetRmlRenderInterface() { return RmlRenderInterface; }
 protected:

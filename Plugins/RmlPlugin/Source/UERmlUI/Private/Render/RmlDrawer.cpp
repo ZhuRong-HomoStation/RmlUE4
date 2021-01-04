@@ -7,20 +7,30 @@
 
 void FRmlDrawer::DrawRenderThread(FRHICommandListImmediate& RHICmdList, const void* RenderTarget)
 {
-	// Set PSO 
-	TShaderMapRef<FRmlShaderVs> Vs(GetGlobalShaderMap(ERHIFeatureLevel::SM5));
+	// Get shader  
+ 	TShaderMapRef<FRmlShaderVs> Vs(GetGlobalShaderMap(ERHIFeatureLevel::SM5));
 	TShaderMapRef<FRmlShaderPs> Ps(GetGlobalShaderMap(ERHIFeatureLevel::SM5));
+	TShaderMapRef<FRmlShaderPsNoTex> PsNoTex(GetGlobalShaderMap(ERHIFeatureLevel::SM5));
+	
+	// Set PSO 
 	FGraphicsPipelineStateInitializer PSOInitializer;
-	PSOInitializer.BoundShaderState.VertexDeclarationRHI = GSimpleElementVertexDeclaration.VertexDeclarationRHI;
+	RHICmdList.ApplyCachedRenderTargets(PSOInitializer);
+	PSOInitializer.BoundShaderState.VertexDeclarationRHI = FRmlMesh::GetMeshDeclaration();
 	PSOInitializer.BoundShaderState.VertexShaderRHI = Vs.GetVertexShader();
-	PSOInitializer.BoundShaderState.PixelShaderRHI = Ps.GetPixelShader();
+	PSOInitializer.BoundShaderState.PixelShaderRHI = BoundMesh->BoundTexture ? Ps.GetPixelShader() : PsNoTex.GetPixelShader();
 	PSOInitializer.PrimitiveType = PT_TriangleList;
 	PSOInitializer.BlendState = TStaticBlendState<>::GetRHI();
+	PSOInitializer.RasterizerState = TStaticRasterizerState<>::GetRHI();
+	PSOInitializer.DepthStencilState = TStaticDepthStencilState<false, CF_Always>::GetRHI();
+	
 	SetGraphicsPipelineState(RHICmdList, PSOInitializer);
 
 	// Set Params
 	Vs->SetParameters(RHICmdList, RenderTransform);
-	Ps->SetParameters(RHICmdList, Ps.GetPixelShader(), BoundMesh->BoundTexture->GetTextureRHI());
+	if (BoundMesh->BoundTexture)
+	{
+		Ps->SetParameters(RHICmdList, Ps.GetPixelShader(), BoundMesh->BoundTexture->GetTextureRHI());
+	}
 
 	// Draw 
 	BoundMesh->DrawMesh(RHICmdList);

@@ -44,8 +44,9 @@ protected:
 public:
 	FSlateWindowElementList*		CurrentElementList;
 	uint32							CurrentLayer;
+	FMatrix							CurrentRenderMatrix;
 protected:
-	FMatrix				RenderMatrix;
+	FMatrix				AdditionRenderMatrix;
 	bool				bUseClipRect;
 	FSlateClippingZone	ClipZone;
 

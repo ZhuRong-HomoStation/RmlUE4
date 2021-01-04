@@ -73,3 +73,28 @@ private:
 	LAYOUT_FIELD(FShaderResourceParameter, InTexture)
 	LAYOUT_FIELD(FShaderResourceParameter, InTextureSampler)
 };
+
+class FRmlShaderPsNoTex : public FGlobalShader
+{
+	DECLARE_SHADER_TYPE(FRmlShaderPsNoTex, Global)
+public:
+	FRmlShaderPsNoTex()
+	{ }
+
+	FRmlShaderPsNoTex(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
+        : FGlobalShader(Initializer)
+	{
+	}
+	
+	static bool ShouldCompilePermutation(
+        const FGlobalShaderPermutationParameters& Parameters)
+	{
+		return IsFeatureLevelSupported(Parameters.Platform, ERHIFeatureLevel::SM5);
+	}
+	static void ModifyCompilationEnvironment(
+        const FGlobalShaderPermutationParameters& Parameters,
+        FShaderCompilerEnvironment& OutEnvironment)
+	{
+		FGlobalShader::ModifyCompilationEnvironment(Parameters,OutEnvironment);
+	}
+};

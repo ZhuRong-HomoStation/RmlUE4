@@ -12,6 +12,8 @@ public:
 	void Construct(const FArguments& InArgs);
 	~SRmlWidget();
 
+	bool AddToViewport(UWorld* InWorld, int32 ZOrder = 0);
+	Rml::Context* GetContext() const { return BoundContext; }
 protected:
 	// ~Begin SWidget API
 	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;

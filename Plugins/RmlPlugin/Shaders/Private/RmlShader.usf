@@ -7,8 +7,8 @@ float4x4		InTransform;
 struct InputVS
 {
 	float2	Position	: ATTRIBUTE0;
-	float2	UV			: ATTRIBUTE2;
-	float4	Color		: ATTRIBUTE1;
+	float2	UV			: ATTRIBUTE1;
+	float4	Color		: ATTRIBUTE2;
 };
 
 struct OutputVS
@@ -39,6 +39,15 @@ OutputPS RmlShader_PS(OutputVS In)
 	OutputPS Out;
 
 	Out.Color = In.Color * InTexture.Sample(InTextureSampler, In.UV);
+	
+	return Out;
+}
+
+OutputPS RmlShader_PSNoTex(OutputVS In)
+{
+	OutputPS Out;
+
+	Out.Color = In.Color;
 	
 	return Out;
 }
