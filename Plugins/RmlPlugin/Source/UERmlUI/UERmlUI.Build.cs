@@ -27,6 +27,7 @@ public class UERmlUI : ModuleRules
 				"ApplicationCore" ,
 				"Projects" ,
 				"RenderCore" ,
+				"InputCore" ,
 			});
 	}
 }

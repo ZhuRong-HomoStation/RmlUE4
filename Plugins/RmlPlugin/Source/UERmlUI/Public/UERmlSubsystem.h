@@ -12,7 +12,7 @@ class UERMLUI_API UUERmlSubsystem : public UEngineSubsystem
 {
 	GENERATED_BODY()
 public:
-	UUERmlSubsystem* Get() { return GEngine->GetEngineSubsystem<UUERmlSubsystem>(); }
+	static UUERmlSubsystem* Get() { return GEngine->GetEngineSubsystem<UUERmlSubsystem>(); }
 
 	
 	FUERmlSystemInterface& GetRmlSystemInterface() { return RmlSystemInterface; }
