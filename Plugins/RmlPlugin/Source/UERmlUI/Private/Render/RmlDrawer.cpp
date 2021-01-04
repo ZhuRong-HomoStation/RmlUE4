@@ -3,6 +3,7 @@
 
 #include "RmlMesh.h"
 #include "RmlShader.h"
+#include "TextureEntries.h"
 
 void FRmlDrawer::DrawRenderThread(FRHICommandListImmediate& RHICmdList, const void* RenderTarget)
 {
@@ -19,16 +20,11 @@ void FRmlDrawer::DrawRenderThread(FRHICommandListImmediate& RHICmdList, const vo
 
 	// Set Params
 	Vs->SetParameters(RHICmdList, RenderTransform);
-	Ps->SetParameters(RHICmdList, Ps, BoundTexture->Resource->TextureRHI->GetTexture2D());
+	Ps->SetParameters(RHICmdList, Ps.GetPixelShader(), BoundMesh->BoundTexture->GetTextureRHI());
 
 	// Draw 
 	BoundMesh->DrawMesh(RHICmdList);
 
 	// Reset self 
 	Reset();
-}
-
-void FRmlDrawer::AddReferencedObjects(FReferenceCollector& Collector)
-{
-	Collector.AddReferencedObject(BoundTexture);
 }

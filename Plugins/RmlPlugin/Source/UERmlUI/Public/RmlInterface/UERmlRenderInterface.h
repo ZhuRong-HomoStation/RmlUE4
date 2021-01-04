@@ -1,7 +1,9 @@
 ﻿#pragma once
+#include "Render/TextureEntries.h"
 #include "RmlUi/Core/RenderInterface.h"
 
 class FRmlMesh;
+class FRmlDrawer;
 
 class UERMLUI_API FUERmlRenderInterface : public Rml::RenderInterface
 {
@@ -34,10 +36,17 @@ protected:
 	virtual void EnableScissorRegion(bool enable) override;
 	virtual void SetScissorRegion(int x, int y, int width, int height) override;
 	// ~End Rml::RenderInterface API
+
+	TSharedPtr<FRmlDrawer, ESPMode::ThreadSafe> _AllocDrawer();
+public:
+	FSlateWindowElementList*		CurrentElementList;
+	uint32							CurrentLayer;
 protected:
 	FMatrix				RenderMatrix;
 	bool				bUseClipRect;
 	FSlateClippingZone	ClipZone;
 
-	TArray<TSharedPtr<FRmlMesh*>>	Meshes;
+	TArray<TSharedPtr<FRmlMesh, ESPMode::ThreadSafe>>		Meshes;
+	TArray<TSharedPtr<FTextureEntry, ESPMode::ThreadSafe>>	AllTextures;
+	TArray<TSharedPtr<FRmlDrawer, ESPMode::ThreadSafe>>		AllDrawers;
 };

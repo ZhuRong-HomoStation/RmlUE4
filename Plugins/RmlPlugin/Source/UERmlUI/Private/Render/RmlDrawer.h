@@ -2,21 +2,16 @@
 
 class FRmlMesh;
 
-class FRmlDrawer : public ICustomSlateElement , public FGCObject
+class FRmlDrawer : public ICustomSlateElement
 {
 public:
 	// ~Begin ICustomSlateElement API 
 	virtual void DrawRenderThread(FRHICommandListImmediate& RHICmdList, const void* RenderTarget) override;
 	// ~End ICustomSlateElement API 
-	
-	// ~Begin FGCObject API 
-	virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
-	// ~End FGCObject API
 
-	bool IsValid() { return BoundTexture && BoundMesh; }
-	void Reset() { BoundMesh.Reset(); BoundTexture = nullptr; }
+	bool IsValid() { return BoundMesh.IsValid(); }
+	void Reset() { BoundMesh.Reset(); }
 public:
-	TSharedPtr<FRmlMesh>		BoundMesh;
-	UTexture2D*					BoundTexture;
-	FMatrix						RenderTransform;
+	TSharedPtr<FRmlMesh, ESPMode::ThreadSafe>	BoundMesh;
+	FMatrix										RenderTransform;
 };
