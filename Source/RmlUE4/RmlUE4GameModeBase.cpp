@@ -17,16 +17,11 @@ void ARmlUE4GameModeBase::BeginPlay()
 
 	Doc->Show();
 	RmlWidget->AddToViewport(GetWorld());
-
-	// debug font
-	// FTimerHandle Handle;
-	// GetWorldTimerManager().SetTimer(Handle, FTimerDelegate::CreateLambda([this]
-	// {
-	// 	static FSlateBrush Brush;
-	// 	Brush.SetResourceObject(UUERmlSubsystem::Get()->GetRmlRenderInterface().GetTexture()->BoundTexture);
-	// 	auto FontImg = SNew(SImage).Image(&Brush);
-	// 	GetWorld()->GetGameViewport()->AddViewportWidgetContent(FontImg, 11);
-	// }), 2, false);
+	FInputModeUIOnly InputMode;
+	InputMode.SetWidgetToFocus(RmlWidget);
+	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+	GetWorld()->GetFirstPlayerController()->SetInputMode(InputMode);
+	GetWorld()->GetFirstPlayerController()->bShowMouseCursor = true;
 }
 
 void ARmlUE4GameModeBase::EndPlay(const EEndPlayReason::Type EndPlayReason)

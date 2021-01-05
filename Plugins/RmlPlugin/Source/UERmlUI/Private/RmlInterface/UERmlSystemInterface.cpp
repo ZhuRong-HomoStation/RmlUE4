@@ -11,6 +11,34 @@ double FUERmlSystemInterface::GetElapsedTime()
 	return FSlateApplication::Get().GetCurrentTime();
 }
 
+void FUERmlSystemInterface::JoinPath(
+	Rml::String& translated_path,
+	const Rml::String& document_path,
+	const Rml::String& path)
+{
+	Super::JoinPath(translated_path, document_path, path);
+	return;
+	
+	FString Path(path.c_str());
+
+	FString FirstNode;
+	Path.Split(TEXT("/"), &FirstNode, nullptr);
+
+	if (FirstNode.IsEmpty() || FirstNode.EndsWith(TEXT(":")) || FirstNode == TEXT("..") || FirstNode == TEXT("."))
+	{
+		FString DocPath(document_path.c_str());
+		int32 Index;
+		DocPath.FindLastChar(TEXT('/'), Index);
+		DocPath.LeftInline(Index + 1);
+		FString ResultPath = FPaths::Combine(DocPath, Path);
+		translated_path = TCHAR_TO_UTF8(*ResultPath);		
+	}
+	else
+	{
+		translated_path = path;
+	}
+}
+
 bool FUERmlSystemInterface::LogMessage(Rml::Log::Type type, const Rml::String& message)
 {
 	switch (type)

@@ -14,4 +14,6 @@ public:
 public:
 	TSharedPtr<FRmlMesh, ESPMode::ThreadSafe>	BoundMesh;
 	FMatrix										RenderTransform;
+	bool					bEnableScissorRect = false;
+	FIntRect				ScissorRect;
 };

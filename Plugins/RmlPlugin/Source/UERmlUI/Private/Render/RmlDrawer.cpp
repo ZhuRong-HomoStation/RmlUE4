@@ -1,5 +1,4 @@
 ﻿#include "RmlDrawer.h"
-
 #include "Logging.h"
 #include "RmlMesh.h"
 #include "RmlShader.h"
@@ -33,6 +32,7 @@ void FRmlDrawer::DrawRenderThread(FRHICommandListImmediate& RHICmdList, const vo
 	}
 
 	// Draw 
+	RHICmdList.SetScissorRect(true, ScissorRect.Min.X, ScissorRect.Min.Y, ScissorRect.Max.X, ScissorRect.Max.Y);
 	BoundMesh->DrawMesh(RHICmdList);
 
 	// Reset self 

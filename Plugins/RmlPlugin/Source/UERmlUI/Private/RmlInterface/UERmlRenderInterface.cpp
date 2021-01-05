@@ -81,20 +81,31 @@ void FUERmlRenderInterface::RenderCompiledGeometry(Rml::CompiledGeometryHandle g
 	auto Drawer = _AllocDrawer();
 
 	Drawer->BoundMesh = reinterpret_cast<FRmlMesh*>(geometry)->AsShared();
-	Drawer->RenderTransform = AdditionRenderMatrix;
-	Drawer->RenderTransform.M[3][0] += translation.x;
-	Drawer->RenderTransform.M[3][1] += translation.y;
-	Drawer->RenderTransform *= CurrentRenderMatrix;
-
+	if (bCustomMatrix)
+	{
+		Drawer->RenderTransform = AdditionRenderMatrix;
+	}
+	else
+	{
+		Drawer->RenderTransform = FMatrix::Identity;
+		Drawer->RenderTransform.M[3][0] = translation.x;
+		Drawer->RenderTransform.M[3][1] = translation.y;
+		Drawer->RenderTransform *= RmlToWidgetMatrix;
+		Drawer->RenderTransform *= OrthoMatrix;
+	}
+	Drawer->bEnableScissorRect = bUseClipRect;
 	if (bUseClipRect)
 	{
-		CurrentElementList->PushClip(ClipZone);
+		auto ClipRectAfterTrans = TransformRect(RmlWidgetRenderTransform, ClipRect);
+		ClipRectAfterTrans = ClipRectAfterTrans.IntersectionWith(ViewportRect);
+		Drawer->ScissorRect = FIntRect(ClipRectAfterTrans.Left, ClipRectAfterTrans.Top, ClipRectAfterTrans.Right, ClipRectAfterTrans.Bottom);
 	}
+	else
+	{
+		Drawer->ScissorRect = FIntRect(ViewportRect.Left, ViewportRect.Top, ViewportRect.Right, ViewportRect.Bottom);
+	}
+	
 	FSlateDrawElement::MakeCustom(*CurrentElementList, CurrentLayer, Drawer);
-	if (bUseClipRect)
-	{
-		CurrentElementList->PopClip();
-	}
 }
 
 void FUERmlRenderInterface::ReleaseCompiledGeometry(Rml::CompiledGeometryHandle geometry)
@@ -207,10 +218,12 @@ void FUERmlRenderInterface::SetTransform(const Rml::Matrix4f* transform)
 	if (transform)
 	{
 		memcpy(&AdditionRenderMatrix, transform->data(), sizeof(Rml::Matrix4f));
+		bCustomMatrix = true;
 	}
 	else
 	{
 		AdditionRenderMatrix = FMatrix::Identity;
+		bCustomMatrix = false;
 	}
 }
 
@@ -232,10 +245,10 @@ void FUERmlRenderInterface::EnableScissorRegion(bool enable)
 
 void FUERmlRenderInterface::SetScissorRegion(int x, int y, int width, int height)
 {
-	ClipZone.TopLeft = FVector2D(x, y);
-	ClipZone.TopRight = FVector2D(x + width, y);
-	ClipZone.BottomLeft = FVector2D(x, y + height);
-	ClipZone.BottomRight = FVector2D(x + width, y + height);
+	ClipRect.Left = (float)FMath::Max(x, 0);
+	ClipRect.Top = (float)FMath::Max(y, 0);
+	ClipRect.Right = (float)x + width;
+	ClipRect.Bottom = (float)y + height;
 }
 
 TSharedPtr<FRmlDrawer, ESPMode::ThreadSafe> FUERmlRenderInterface::_AllocDrawer()

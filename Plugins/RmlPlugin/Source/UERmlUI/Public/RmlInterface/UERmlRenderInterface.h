@@ -45,11 +45,16 @@ protected:
 public:
 	FSlateWindowElementList*		CurrentElementList;
 	uint32							CurrentLayer;
-	FMatrix							CurrentRenderMatrix;
+	FSlateRenderTransform			RmlWidgetRenderTransform;
+	FMatrix							RmlToWidgetMatrix;
+	FMatrix							OrthoMatrix;
+	FMatrix							RmlRenderMatrix;
+	FSlateRect						ViewportRect;
 protected:
 	FMatrix				AdditionRenderMatrix;
+	bool				bCustomMatrix;
 	bool				bUseClipRect;
-	FSlateClippingZone	ClipZone;
+	FSlateRect			ClipRect;
 
 	// textures 
 	TMap<FString, TSharedPtr<FRmlTextureEntry, ESPMode::ThreadSafe>>	AllTextures;

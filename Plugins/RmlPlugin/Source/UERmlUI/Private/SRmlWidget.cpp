@@ -50,7 +50,7 @@ bool SRmlWidget::AddToViewport(UWorld* InWorld, int32 ZOrder)
 void SRmlWidget::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
 {	
 	// update size 
-	FVector2D CurSizeUE = AllottedGeometry.GetAbsoluteSize();
+	FVector2D CurSizeUE = AllottedGeometry.GetLocalSize();
 	Rml::Vector2i CurSize((int)CurSizeUE.X, (int)CurSizeUE.Y);
 	Rml::Vector2i LastSize = BoundContext->GetDimensions();
 	if (CurSize != LastSize)
@@ -73,17 +73,27 @@ int32 SRmlWidget::OnPaint(
 {
 	auto& RenderInterface = UUERmlSubsystem::Get()->GetRmlRenderInterface();
 
-	auto Size = AllottedGeometry.GetAbsoluteSize();
 	RenderInterface.CurrentElementList = &OutDrawElements;
 	RenderInterface.CurrentLayer = LayerId;
-	RenderInterface.CurrentRenderMatrix = AllottedGeometry.GetAccumulatedRenderTransform().To3DMatrix();
-	RenderInterface.CurrentRenderMatrix.M[0][0] = 1;
-	RenderInterface.CurrentRenderMatrix.M[1][1] = 1;
-	RenderInterface.CurrentRenderMatrix *= FMatrix(
-			FPlane(2.0f / Size.X,0.0f,			0.0f,		0.0f),
-			FPlane(0.0f,			-2.0f / Size.Y,	0.0f,		0.0f),
+
+	// local space -> render space 
+	RenderInterface.RmlWidgetRenderTransform = AllottedGeometry.GetAccumulatedRenderTransform();
+	RenderInterface.RmlToWidgetMatrix = RenderInterface.RmlWidgetRenderTransform.To3DMatrix();
+	
+	// render space -> NDC space 
+	FVector2D SubPart, AddPart;
+	SubPart.X = MyCullingRect.Right - MyCullingRect.Left;
+	SubPart.Y = MyCullingRect.Bottom - MyCullingRect.Top;
+	AddPart.X = MyCullingRect.Right + MyCullingRect.Left;
+	AddPart.Y = MyCullingRect.Bottom + MyCullingRect.Top;
+	RenderInterface.OrthoMatrix = FMatrix(
+			FPlane(2.0f / SubPart.X,0.0f,			0.0f,		0.0f),
+			FPlane(0.0f,			2.0f / SubPart.Y,	0.0f,		0.0f),
 			FPlane(0.0f,			0.0f,			1.0f,		0.0f),
-			FPlane(-1.0f,		1.0f,			0,			1.0f));
+			FPlane(-AddPart.X / SubPart.X,		-AddPart.Y / SubPart.Y,			0,			1.0f));
+	RenderInterface.RmlRenderMatrix = RenderInterface.RmlToWidgetMatrix * RenderInterface.OrthoMatrix;
+	RenderInterface.ViewportRect = MyCullingRect;
+	
 	BoundContext->Render();
 	
 	return LayerId + 1;
@@ -119,6 +129,10 @@ FReply SRmlWidget::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent&
 {
 	auto ModifierState = MouseEvent.GetModifierKeys();
 	auto MousePos = MouseEvent.GetScreenSpacePosition();
+
+	// screen space -> local space 
+	MousePos = MyGeometry.GetAccumulatedRenderTransform().Inverse().TransformPoint(MousePos);
+	
 	return BoundContext->ProcessMouseMove(
 		MousePos.X,
 		MousePos.Y,
@@ -145,6 +159,6 @@ FReply SRmlWidget::OnMouseWheel(const FGeometry& MyGeometry, const FPointerEvent
 {
 	auto ModifierState = MouseEvent.GetModifierKeys();
 	return BoundContext->ProcessMouseWheel(
-        MouseEvent.GetWheelDelta(),
+        -MouseEvent.GetWheelDelta(),
         FRmlHelper::GetKeyModifierState(ModifierState)) ? FReply::Handled() : FReply::Unhandled();
 }
