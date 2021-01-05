@@ -12,6 +12,9 @@ public:
 	void Construct(const FArguments& InArgs);
 	~SRmlWidget();
 
+	Rml::ElementDocument* LoadDocument(const FString& InPath);
+	void DestroyDocument(Rml::ElementDocument* InDoc);
+	
 	bool AddToViewport(UWorld* InWorld, int32 ZOrder = 0);
 	Rml::Context* GetContext() const { return BoundContext; }
 protected:
@@ -33,5 +36,6 @@ protected:
 public:
 	
 private:
-	Rml::Context*		BoundContext;
+	Rml::Context*					BoundContext;
+	TArray<Rml::ElementDocument*>	Documents;
 };

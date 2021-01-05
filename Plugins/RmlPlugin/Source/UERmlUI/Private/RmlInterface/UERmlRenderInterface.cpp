@@ -110,6 +110,8 @@ bool FUERmlRenderInterface::LoadTexture(Rml::TextureHandle& texture_handle, Rml:
 	if (FoundTexture)
 	{
 		texture_handle = reinterpret_cast<Rml::TextureHandle>((*FoundTexture).Get());
+		texture_dimensions.x = (*FoundTexture)->BoundTexture->GetSurfaceWidth();
+		texture_dimensions.y = (*FoundTexture)->BoundTexture->GetSurfaceHeight();
 		return true;
 	}
 	else
@@ -130,20 +132,21 @@ bool FUERmlRenderInterface::LoadTexture(Rml::TextureHandle& texture_handle, Rml:
 			if (ImageFormat == EImageFormat::Invalid) return false;
 			TSharedPtr<IImageWrapper> ImageWrapper = ImageWrapperModule.CreateImageWrapper(ImageFormat);
 			if (!ImageWrapper->SetCompressed(Data.GetData(), Data.Num())) return false;
-			TArray64<uint8> RawData;
-			int32 Width = ImageWrapper->GetWidth();
-			int32 Height = ImageWrapper->GetHeight();
-			ImageWrapper->GetRaw(ERGBFormat::RGBA, 8, RawData);
+			TArray64<uint8>* RawData = new TArray64<uint8>();
+			texture_dimensions.x = ImageWrapper->GetWidth();
+			texture_dimensions.y = ImageWrapper->GetHeight();
+			ImageWrapper->GetRaw(ERGBFormat::RGBA, 8, *RawData);
 
 			// create texture 
-			UTexture2D* LoadedTexture = UTexture2D::CreateTransient(Width, Height, EPixelFormat::PF_R8G8B8A8);
+			UTexture2D* LoadedTexture = UTexture2D::CreateTransient(texture_dimensions.x, texture_dimensions.y, EPixelFormat::PF_R8G8B8A8);
 			LoadedTexture->UpdateResource();
-			FUpdateTextureRegion2D* TextureRegion = new FUpdateTextureRegion2D(0, 0, 0, 0, Width, Height);
-			auto DataCleanup = [](uint8* Data, const FUpdateTextureRegion2D* UpdateRegion)
+			FUpdateTextureRegion2D* TextureRegion = new FUpdateTextureRegion2D(0, 0, 0, 0, texture_dimensions.x, texture_dimensions.y);
+			auto DataCleanup = [RawData](uint8* Data, const FUpdateTextureRegion2D* UpdateRegion)
 			{
+				delete RawData;
 				delete UpdateRegion;
 			};
-			LoadedTexture->UpdateTextureRegions(0, 1u, TextureRegion, 4 * Width, 4, RawData.GetData(), DataCleanup);
+			LoadedTexture->UpdateTextureRegions(0, 1u, TextureRegion, 4 * texture_dimensions.x, 4, RawData->GetData(), DataCleanup);
 
 			// add to array 
 			auto& AddedTexture = AllTextures.Add(Path, MakeShared<FRmlTextureEntry, ESPMode::ThreadSafe>(LoadedTexture, Path));
@@ -156,6 +159,8 @@ bool FUERmlRenderInterface::LoadTexture(Rml::TextureHandle& texture_handle, Rml:
 			if (!LoadedObj) return false;
 			auto& AddedTexture = AllTextures.Add(Path, MakeShared<FRmlTextureEntry, ESPMode::ThreadSafe>((UTexture*)LoadedObj, Path));
 			texture_handle = reinterpret_cast<Rml::TextureHandle>(AddedTexture.Get());
+			texture_dimensions.x = AddedTexture->BoundTexture->GetSurfaceWidth();
+			texture_dimensions.y = AddedTexture->BoundTexture->GetSurfaceHeight();			
 			return true;
 		}
 	}

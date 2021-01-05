@@ -11,6 +11,7 @@ public:
 	FUERmlRenderInterface();
 
 	bool SetTexture(FString Path, UTexture* InTexture, bool bAddIfNotExist = true);
+	TSharedPtr<FRmlTextureEntry, ESPMode::ThreadSafe> GetTexture() { return AllTextures.begin().Value(); }
 	const TArray<TSharedPtr<FRmlTextureEntry, ESPMode::ThreadSafe>>& GetCreatedTextures() { return AllCreatedTextures; }
 	
 protected:

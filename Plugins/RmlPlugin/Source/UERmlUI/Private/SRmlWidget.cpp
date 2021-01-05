@@ -11,7 +11,28 @@ void SRmlWidget::Construct(const FArguments& InArgs)
 
 SRmlWidget::~SRmlWidget()
 {
+	for (auto Doc : Documents)
+	{
+		Doc->Close();
+		BoundContext->UnloadDocument(Doc);
+	}
+	Documents.Reset();
 	Rml::RemoveContext(BoundContext->GetName());
+}
+
+Rml::ElementDocument* SRmlWidget::LoadDocument(const FString& InPath)
+{
+	auto Doc = BoundContext->LoadDocument(TCHAR_TO_UTF8(*InPath));
+	if (Doc) Documents.Add(Doc);
+	return Doc;
+}
+
+void SRmlWidget::DestroyDocument(Rml::ElementDocument* InDoc)
+{
+	auto Index = Documents.IndexOfByKey(InDoc);
+	if (Index == INDEX_NONE) return;
+	InDoc->Close();
+	Documents.RemoveAtSwap(Index);
 }
 
 bool SRmlWidget::AddToViewport(UWorld* InWorld, int32 ZOrder)
@@ -56,6 +77,8 @@ int32 SRmlWidget::OnPaint(
 	RenderInterface.CurrentElementList = &OutDrawElements;
 	RenderInterface.CurrentLayer = LayerId;
 	RenderInterface.CurrentRenderMatrix = AllottedGeometry.GetAccumulatedRenderTransform().To3DMatrix();
+	RenderInterface.CurrentRenderMatrix.M[0][0] = 1;
+	RenderInterface.CurrentRenderMatrix.M[1][1] = 1;
 	RenderInterface.CurrentRenderMatrix *= FMatrix(
 			FPlane(2.0f / Size.X,0.0f,			0.0f,		0.0f),
 			FPlane(0.0f,			-2.0f / Size.Y,	0.0f,		0.0f),
