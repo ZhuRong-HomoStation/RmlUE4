@@ -81,10 +81,9 @@ void FUERmlRenderInterface::RenderCompiledGeometry(Rml::CompiledGeometryHandle g
 	auto Drawer = _AllocDrawer();
 
 	Drawer->BoundMesh = reinterpret_cast<FRmlMesh*>(geometry)->AsShared();
-	Drawer->RenderTransform = FMatrix::Identity;
+	Drawer->RenderTransform = AdditionRenderMatrix;
 	Drawer->RenderTransform.M[3][0] += translation.x;
 	Drawer->RenderTransform.M[3][1] += translation.y;
-	Drawer->RenderTransform *= AdditionRenderMatrix;
 	Drawer->RenderTransform *= CurrentRenderMatrix;
 
 	if (bUseClipRect)
@@ -170,11 +169,15 @@ bool FUERmlRenderInterface::GenerateTexture(Rml::TextureHandle& texture_handle, 
 	UTexture2D* Texture = UTexture2D::CreateTransient(source_dimensions.x, source_dimensions.y, EPixelFormat::PF_R8G8B8A8);
 	Texture->UpdateResource();
 	FUpdateTextureRegion2D* TextureRegion = new FUpdateTextureRegion2D(0, 0, 0, 0, source_dimensions.x, source_dimensions.y);
+	int32 Size = source_dimensions.x * source_dimensions.y * 4;
+	uint8* Data = new uint8[Size];
+	FMemory::Memcpy(Data, source, Size);	
 	auto DataCleanup = [](uint8* Data, const FUpdateTextureRegion2D* UpdateRegion)
 	{
+		delete Data;
 		delete UpdateRegion;
 	};
-	Texture->UpdateTextureRegions(0, 1u, TextureRegion, 4 * source_dimensions.x, 4, (uint8*)source, DataCleanup);
+	Texture->UpdateTextureRegions(0, 1u, TextureRegion, 4 * source_dimensions.x, 4, Data, DataCleanup);
 
 	AllCreatedTextures.Add(MakeShared<FRmlTextureEntry, ESPMode::ThreadSafe>(Texture));
 	texture_handle = reinterpret_cast<Rml::TextureHandle>(AllCreatedTextures.Top().Get());

@@ -1,9 +1,7 @@
 ﻿#include "RmlDrawer.h"
-
-
 #include "RmlMesh.h"
 #include "RmlShader.h"
-#include "TextureEntries.h"
+#include "Render/TextureEntries.h"
 
 void FRmlDrawer::DrawRenderThread(FRHICommandListImmediate& RHICmdList, const void* RenderTarget)
 {
@@ -19,7 +17,7 @@ void FRmlDrawer::DrawRenderThread(FRHICommandListImmediate& RHICmdList, const vo
 	PSOInitializer.BoundShaderState.VertexShaderRHI = Vs.GetVertexShader();
 	PSOInitializer.BoundShaderState.PixelShaderRHI = BoundMesh->BoundTexture ? Ps.GetPixelShader() : PsNoTex.GetPixelShader();
 	PSOInitializer.PrimitiveType = PT_TriangleList;
-	PSOInitializer.BlendState = TStaticBlendState<>::GetRHI();
+	PSOInitializer.BlendState = TStaticBlendState<CW_RGBA, BO_Add, BF_SourceAlpha, BF_InverseSourceAlpha, BO_Add, BF_Zero, BF_One>::GetRHI();
 	PSOInitializer.RasterizerState = TStaticRasterizerState<>::GetRHI();
 	PSOInitializer.DepthStencilState = TStaticDepthStencilState<false, CF_Always>::GetRHI();
 	

@@ -1,7 +1,7 @@
 ﻿#include "SRmlWidget.h"
-
 #include "RmlHelper.h"
 #include "UERmlSubsystem.h"
+#include "Widgets/Images/SImage.h"
 #include "Widgets/Layout/SConstraintCanvas.h"
 
 void SRmlWidget::Construct(const FArguments& InArgs)
@@ -27,7 +27,7 @@ bool SRmlWidget::AddToViewport(UWorld* InWorld, int32 ZOrder)
 }
 
 void SRmlWidget::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
-{
+{	
 	// update size 
 	FVector2D CurSizeUE = AllottedGeometry.GetAbsoluteSize();
 	Rml::Vector2i CurSize((int)CurSizeUE.X, (int)CurSizeUE.Y);
@@ -57,10 +57,10 @@ int32 SRmlWidget::OnPaint(
 	RenderInterface.CurrentLayer = LayerId;
 	RenderInterface.CurrentRenderMatrix = AllottedGeometry.GetAccumulatedRenderTransform().To3DMatrix();
 	RenderInterface.CurrentRenderMatrix *= FMatrix(
-			FPlane(1.0f / Size.X,0.0f,			0.0f,		0.0f),
-			FPlane(0.0f,			1.0f / Size.Y,	0.0f,		0.0f),
-			FPlane(0.0f,			0.0f,			1,			0.0f),
-			FPlane(-0.5f,		-0.5f,			0,			1.0f));
+			FPlane(2.0f / Size.X,0.0f,			0.0f,		0.0f),
+			FPlane(0.0f,			-2.0f / Size.Y,	0.0f,		0.0f),
+			FPlane(0.0f,			0.0f,			1.0f,		0.0f),
+			FPlane(-1.0f,		1.0f,			0,			1.0f));
 	BoundContext->Render();
 	
 	return LayerId + 1;
