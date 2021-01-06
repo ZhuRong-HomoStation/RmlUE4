@@ -83,7 +83,12 @@ void FUERmlRenderInterface::RenderCompiledGeometry(Rml::CompiledGeometryHandle g
 	Drawer->BoundMesh = reinterpret_cast<FRmlMesh*>(geometry)->AsShared();
 	if (bCustomMatrix)
 	{
-		Drawer->RenderTransform = AdditionRenderMatrix;
+		Drawer->RenderTransform = FMatrix::Identity;
+		Drawer->RenderTransform.M[3][0] += translation.x;
+		Drawer->RenderTransform.M[3][1] += translation.y;
+		Drawer->RenderTransform *= AdditionRenderMatrix;
+		Drawer->RenderTransform *= RmlToWidgetMatrix;
+		Drawer->RenderTransform *= OrthoMatrix;
 	}
 	else
 	{

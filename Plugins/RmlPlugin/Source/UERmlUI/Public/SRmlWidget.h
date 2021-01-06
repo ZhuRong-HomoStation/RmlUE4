@@ -17,6 +17,8 @@ public:
 	
 	bool AddToViewport(UWorld* InWorld, int32 ZOrder = 0);
 	Rml::Context* GetContext() const { return BoundContext; }
+
+	void UpdateParentWnd();
 protected:
 	// ~Begin SWidget API
 	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
@@ -40,4 +42,5 @@ public:
 private:
 	Rml::Context*					BoundContext;
 	TArray<Rml::ElementDocument*>	Documents;
+	TWeakPtr<SWindow>				ParentWnd;
 };

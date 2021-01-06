@@ -157,7 +157,7 @@ p.title
 {
 	width: 64px;
 	height: 64px;
-	decorator: image( ./assets/high_scores_alien_1.png );
+	decorator: image( ./high_scores_alien_1.png );
 }
 #decorators .image-invader
 {

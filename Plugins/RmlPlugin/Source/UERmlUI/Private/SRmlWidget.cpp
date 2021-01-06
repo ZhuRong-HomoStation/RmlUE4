@@ -44,7 +44,20 @@ bool SRmlWidget::AddToViewport(UWorld* InWorld, int32 ZOrder)
 	// add to view port 
 	ViewportClient->AddViewportWidgetContent(this->AsShared(), ZOrder + 10);
 
+	// update parent wnd
+	UpdateParentWnd();
+	
 	return true;
+}
+
+void SRmlWidget::UpdateParentWnd()
+{
+	SWidget* Widget = this;
+	while (!Widget->Advanced_IsWindow())
+	{
+		Widget = Widget->GetParentWidget().Get();
+	}
+	ParentWnd = StaticCastSharedRef<SWindow>(Widget->AsShared());
 }
 
 void SRmlWidget::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
@@ -71,6 +84,7 @@ int32 SRmlWidget::OnPaint(
 	const FWidgetStyle& InWidgetStyle,
 	bool bParentEnabled) const
 {
+	if (!ParentWnd.IsValid()) return LayerId;
 	auto& RenderInterface = UUERmlSubsystem::Get()->GetRmlRenderInterface();
 
 	RenderInterface.CurrentElementList = &OutDrawElements;
@@ -81,16 +95,12 @@ int32 SRmlWidget::OnPaint(
 	RenderInterface.RmlToWidgetMatrix = RenderInterface.RmlWidgetRenderTransform.To3DMatrix();
 	
 	// render space -> NDC space 
-	FVector2D SubPart, AddPart;
-	SubPart.X = MyCullingRect.Right - MyCullingRect.Left;
-	SubPart.Y = MyCullingRect.Bottom - MyCullingRect.Top;
-	AddPart.X = MyCullingRect.Right + MyCullingRect.Left;
-	AddPart.Y = MyCullingRect.Bottom + MyCullingRect.Top;
+	FVector2D Size = ParentWnd.Pin()->GetSizeInScreen();
 	RenderInterface.OrthoMatrix = FMatrix(
-			FPlane(2.0f / SubPart.X,0.0f,			0.0f,		0.0f),
-			FPlane(0.0f,			2.0f / SubPart.Y,	0.0f,		0.0f),
-			FPlane(0.0f,			0.0f,			1.0f,		0.0f),
-			FPlane(-AddPart.X / SubPart.X,		-AddPart.Y / SubPart.Y,			0,			1.0f));
+			FPlane(2.0f / Size.X,0.0f,			0.0f,		0.0f),
+			FPlane(0.0f,			-2.0f / Size.Y,	0.0f,		0.0f),
+			FPlane(0.0f,			0.0f,			1.f / 5000.f,0.0f),
+			FPlane(-1,			1,				0.5f,		1.0f));
 	RenderInterface.RmlRenderMatrix = RenderInterface.RmlToWidgetMatrix * RenderInterface.OrthoMatrix;
 	RenderInterface.ViewportRect = MyCullingRect;
 	
@@ -109,7 +119,7 @@ FReply SRmlWidget::OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKey
 	auto ModifierState = InKeyEvent.GetModifierKeys();
 	return BoundContext->ProcessKeyDown(
 		FRmlHelper::ConvertKey(InKeyEvent.GetKey()),
-		FRmlHelper::GetKeyModifierState(ModifierState)) ? FReply::Handled() : FReply::Unhandled();
+		FRmlHelper::GetKeyModifierState(ModifierState)) ? FReply::Unhandled() : FReply::Handled();
 }
 
 FReply SRmlWidget::OnKeyUp(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent)
@@ -117,12 +127,12 @@ FReply SRmlWidget::OnKeyUp(const FGeometry& MyGeometry, const FKeyEvent& InKeyEv
 	auto ModifierState = InKeyEvent.GetModifierKeys();
 	return BoundContext->ProcessKeyUp(
         FRmlHelper::ConvertKey(InKeyEvent.GetKey()),
-        FRmlHelper::GetKeyModifierState(ModifierState)) ? FReply::Handled() : FReply::Unhandled();
+        FRmlHelper::GetKeyModifierState(ModifierState)) ? FReply::Unhandled() : FReply::Handled();
 }
 
 FReply SRmlWidget::OnKeyChar(const FGeometry& MyGeometry, const FCharacterEvent& InCharacterEvent)
 {
-	return BoundContext->ProcessTextInput(InCharacterEvent.GetCharacter()) ? FReply::Handled() : FReply::Unhandled();
+	return BoundContext->ProcessTextInput(InCharacterEvent.GetCharacter()) ? FReply::Unhandled() : FReply::Handled();
 }
 
 FReply SRmlWidget::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
@@ -136,7 +146,7 @@ FReply SRmlWidget::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent&
 	return BoundContext->ProcessMouseMove(
 		MousePos.X,
 		MousePos.Y,
-		FRmlHelper::GetKeyModifierState(ModifierState)) ? FReply::Handled() : FReply::Unhandled();
+		FRmlHelper::GetKeyModifierState(ModifierState)) ? FReply::Unhandled() : FReply::Handled();
 }
 
 FReply SRmlWidget::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
@@ -144,7 +154,7 @@ FReply SRmlWidget::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointer
 	auto ModifierState = MouseEvent.GetModifierKeys();
 	return BoundContext->ProcessMouseButtonDown(
 		FRmlHelper::GetMouseKey(MouseEvent.GetEffectingButton()),
-		FRmlHelper::GetKeyModifierState(ModifierState)) ? FReply::Handled() : FReply::Unhandled();
+		FRmlHelper::GetKeyModifierState(ModifierState)) ? FReply::Unhandled() : FReply::Handled();
 }
 
 FReply SRmlWidget::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
@@ -152,7 +162,7 @@ FReply SRmlWidget::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEv
 	auto ModifierState = MouseEvent.GetModifierKeys();
 	return BoundContext->ProcessMouseButtonUp(
         FRmlHelper::GetMouseKey(MouseEvent.GetEffectingButton()),
-        FRmlHelper::GetKeyModifierState(ModifierState)) ? FReply::Handled() : FReply::Unhandled();
+        FRmlHelper::GetKeyModifierState(ModifierState)) ? FReply::Unhandled() : FReply::Handled();
 }
 
 FReply SRmlWidget::OnMouseWheel(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
@@ -160,5 +170,5 @@ FReply SRmlWidget::OnMouseWheel(const FGeometry& MyGeometry, const FPointerEvent
 	auto ModifierState = MouseEvent.GetModifierKeys();
 	return BoundContext->ProcessMouseWheel(
         -MouseEvent.GetWheelDelta(),
-        FRmlHelper::GetKeyModifierState(ModifierState)) ? FReply::Handled() : FReply::Unhandled();
+        FRmlHelper::GetKeyModifierState(ModifierState)) ? FReply::Unhandled() : FReply::Handled();
 }
