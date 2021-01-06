@@ -3,6 +3,7 @@
 #include "HAL/PlatformApplicationMisc.h"
 
 FUERmlSystemInterface::FUERmlSystemInterface()
+	: CachedCursor(EMouseCursor::Default)
 {
 }
 
@@ -64,7 +65,34 @@ bool FUERmlSystemInterface::LogMessage(Rml::Log::Type type, const Rml::String& m
 
 void FUERmlSystemInterface::SetMouseCursor(const Rml::String& cursor_name)
 {
-	// 缓存Cursor然后在回调中完成设置 
+	if (cursor_name == "move")
+	{
+		CachedCursor = EMouseCursor::CardinalCross;
+	}
+	else if (cursor_name == "pointer")
+	{
+		CachedCursor = EMouseCursor::Hand;
+	}
+	else if (cursor_name == "resize")
+	{
+		CachedCursor = EMouseCursor::ResizeSouthEast;
+	}
+	else if (cursor_name == "cross")
+	{
+		CachedCursor = EMouseCursor::Crosshairs;
+	}
+	else if (cursor_name == "text")
+	{
+		CachedCursor = EMouseCursor::TextEditBeam;
+	}
+	else if (cursor_name == "unavailable")
+	{
+		CachedCursor = EMouseCursor::SlashedCircle;
+	}
+	else
+	{
+		CachedCursor = EMouseCursor::Default;
+	}
 }
 
 void FUERmlSystemInterface::SetClipboardText(const Rml::String& text)

@@ -7,11 +7,9 @@
 class UERMLUI_API SRmlWidget : public SLeafWidget
 {
 	SLATE_BEGIN_ARGS(SRmlWidget)
-		: _RenderInterface(nullptr)
-		, _InitContext(nullptr)
+		: _InitContext(nullptr)
 		, _InitEnableRml(true)
 	{}
-		SLATE_ARGUMENT(FUERmlRenderInterface*, RenderInterface)
 		SLATE_ARGUMENT(Rml::Context*, InitContext)
 		SLATE_ARGUMENT(bool, InitEnableRml)
 	SLATE_END_ARGS()
@@ -40,10 +38,11 @@ protected:
 	virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	virtual FReply OnMouseWheel(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 
+	virtual FCursorReply OnCursorQuery(const FGeometry& MyGeometry, const FPointerEvent& CursorEvent) const override;
+
 	virtual bool SupportsKeyboardFocus() const override { return true; }
 	// ~End SWidget API
 private:
 	bool					bEnableRml;
 	Rml::Context*			BoundContext;
-	FUERmlRenderInterface*	RenderInterface;
 };

@@ -38,8 +38,9 @@
 
 body.window
 {
-	width: 1300px;
-	height: 750px;
+	margin: auto;
+	width: 80%;
+	height: 80%;
 	min-width: 1030px;
 	min-height: 300px;
 	max-width: -1px;

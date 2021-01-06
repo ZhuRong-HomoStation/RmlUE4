@@ -1,12 +1,12 @@
 ﻿#include "SRmlWidget.h"
 #include "RmlHelper.h"
+#include "RmlInterface/UERmlSystemInterface.h"
 #include "Widgets/Images/SImage.h"
 #include "Widgets/Layout/SConstraintCanvas.h"
 #include "RmlUi/Core.h"
 
 void SRmlWidget::Construct(const FArguments& InArgs)
 {
-	RenderInterface = InArgs._RenderInterface;
 	BoundContext = InArgs._InitContext;
 	bEnableRml = InArgs._InitEnableRml;
 }
@@ -61,7 +61,10 @@ int32 SRmlWidget::OnPaint(
 	const FWidgetStyle& InWidgetStyle,
 	bool bParentEnabled) const
 {
-	if (!bEnableRml || !BoundContext || !RenderInterface) return LayerId;
+	if (!bEnableRml || !BoundContext) return LayerId;
+
+	// get render interface
+	FUERmlRenderInterface* RenderInterface = (FUERmlRenderInterface*)Rml::GetRenderInterface();
 	
 	// set global info for call draw api 
 	RenderInterface->CurrentElementList = &OutDrawElements;
@@ -173,4 +176,15 @@ FReply SRmlWidget::OnMouseWheel(const FGeometry& MyGeometry, const FPointerEvent
 	return BoundContext->ProcessMouseWheel(
         -MouseEvent.GetWheelDelta(),
         FRmlHelper::GetKeyModifierState(ModifierState)) ? FReply::Unhandled() : FReply::Handled();
+}
+
+FCursorReply SRmlWidget::OnCursorQuery(const FGeometry& MyGeometry, const FPointerEvent& CursorEvent) const
+{
+	if (!bEnableRml || !BoundContext) return FCursorReply::Unhandled();
+
+	// find interface 
+	FUERmlSystemInterface* SystemInterface = (FUERmlSystemInterface*)Rml::GetSystemInterface();
+
+	// return cursor style 
+	return FCursorReply::Cursor(SystemInterface->CachedCursorState());
 }

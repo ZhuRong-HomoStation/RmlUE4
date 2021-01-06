@@ -42,7 +42,6 @@ void ARmlUE4GameModeBase::BeginPlay()
 
 	// create widget 
 	auto RmlWidget = SNew(SRmlWidget)
-	.RenderInterface(&RmlRenderInterface)
 	.InitContext(Context);
 
 	// add widget to viewport 
