@@ -28,6 +28,8 @@
 
 #ifndef RMLUI_CORE_TRANSFORMPRIMITIVE_H
 #define RMLUI_CORE_TRANSFORMPRIMITIVE_H
+#pragma warning(push)
+#pragma warning(disable: 4582)
 
 #include "Header.h"
 #include "Types.h"
@@ -280,4 +282,6 @@ struct RMLUICORE_API TransformPrimitive {
 
 
 } // namespace Rml
+
+#pragma warning(pop)
 #endif

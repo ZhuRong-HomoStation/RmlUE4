@@ -52,7 +52,7 @@ public:
 	DataVariable() {}
 	DataVariable(VariableDefinition* definition, void* ptr) : definition(definition), ptr(ptr) {}
 
-	explicit operator bool() const { return definition; }
+	explicit operator bool() const { return (bool)definition; }
 
 	bool Get(Variant& variant);
 	bool Set(const Variant& variant);

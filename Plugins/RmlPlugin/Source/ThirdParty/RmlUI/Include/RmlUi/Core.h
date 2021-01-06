@@ -29,11 +29,6 @@
 #ifndef RMLUI_CORE_H
 #define RMLUI_CORE_H
 
-#pragma warning(push)
-#pragma warning(disable:4582)
-#pragma warning(disable:4583)
-#pragma warning(disable:4800)
-
 #include "Core/Core.h"
 
 #include "Core/Types.h"
@@ -110,5 +105,4 @@
 #include "Core/Elements/ElementTabSet.h"
 #include "Core/Elements/SelectOption.h"
 
-#pragma warning(pop)
 #endif
