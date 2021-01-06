@@ -26,6 +26,12 @@ bool FUERmlRenderInterface::SetTexture(FString Path, UTexture* InTexture, bool b
 	return false;
 }
 
+void FUERmlRenderInterface::EndRender(FSlateWindowElementList& InCurrentElementList, uint32 InCurrentLayer)
+{
+	FSlateDrawElement::MakeCustom(InCurrentElementList, InCurrentLayer, CurrentDrawer);
+	CurrentDrawer.Reset();
+}
+
 Rml::CompiledGeometryHandle FUERmlRenderInterface::CompileGeometry(
 	Rml::Vertex* vertices,
 	int num_vertices,
@@ -59,25 +65,20 @@ Rml::CompiledGeometryHandle FUERmlRenderInterface::CompileGeometry(
 void FUERmlRenderInterface::RenderCompiledGeometry(Rml::CompiledGeometryHandle geometry,
 	const Rml::Vector2f& translation)
 {
-	// check state 
-	check(CurrentElementList);
+	check(CurrentDrawer.IsValid());
+	
+	FMatrix Matrix(FMatrix::Identity);
+	FIntRect ResultClipRect;
 
-	// get drawer 
-	auto Drawer = _AllocDrawer();
-
-	// get mesh 
-	Drawer->BoundMesh = reinterpret_cast<FRmlMesh*>(geometry)->AsShared();
-
-	// local space -> Rml space 
-	Drawer->RenderTransform.SetIdentity();
-	Drawer->RenderTransform.M[3][0] = translation.x;
-	Drawer->RenderTransform.M[3][1] = translation.y;
-
+	// local space -> Rml space  
+	Matrix.M[3][0] = translation.x;
+	Matrix.M[3][1] = translation.y;
+	
 	// addition matrix 
-	if (bCustomMatrix) { Drawer->RenderTransform *= AdditionRenderMatrix; }
+	if (bCustomMatrix) { Matrix *= AdditionRenderMatrix; }
 
 	// Rml space -> NDC(Normalized Device Space) 
-	Drawer->RenderTransform *= RmlRenderMatrix;
+	Matrix *= RmlRenderMatrix;
 
 	// set up clip rect 
 	if (bUseClipRect)
@@ -89,20 +90,22 @@ void FUERmlRenderInterface::RenderCompiledGeometry(Rml::CompiledGeometryHandle g
 		ClipRectAfterTrans = ClipRectAfterTrans.IntersectionWith(ViewportRect);
 
 		// set up rect 
-		Drawer->ScissorRect = FIntRect(
-			FMath::RoundToInt(ClipRectAfterTrans.Left),
-			FMath::RoundToInt(ClipRectAfterTrans.Top),
-			FMath::RoundToInt(ClipRectAfterTrans.Right),
-			FMath::RoundToInt(ClipRectAfterTrans.Bottom));
+		ResultClipRect.Min.X = FMath::RoundToInt(ClipRectAfterTrans.Left);
+		ResultClipRect.Min.Y = FMath::RoundToInt(ClipRectAfterTrans.Top);
+		ResultClipRect.Max.X = FMath::RoundToInt(ClipRectAfterTrans.Right);
+		ResultClipRect.Max.Y = FMath::RoundToInt(ClipRectAfterTrans.Bottom);
 	}
 	else
 	{
-		// use screen scissor rect 
-		Drawer->ScissorRect = FIntRect(ViewportRect.Left, ViewportRect.Top, ViewportRect.Right, ViewportRect.Bottom);
+		// use screen scissor rect
+		ResultClipRect.Min.X = ViewportRect.Left;
+		ResultClipRect.Min.Y = ViewportRect.Top;
+		ResultClipRect.Max.X = ViewportRect.Right;
+		ResultClipRect.Max.Y = ViewportRect.Bottom;
 	}
 
-	// call draw api 
-	FSlateDrawElement::MakeCustom(*CurrentElementList, CurrentLayer, Drawer);
+	// Emplace draw command 
+	CurrentDrawer->EmplaceMesh(reinterpret_cast<FRmlMesh*>(geometry)->AsShared(), Matrix, ResultClipRect);
 }
 
 void FUERmlRenderInterface::ReleaseCompiledGeometry(Rml::CompiledGeometryHandle geometry)
@@ -240,13 +243,14 @@ TSharedPtr<FRmlDrawer, ESPMode::ThreadSafe> FUERmlRenderInterface::_AllocDrawer(
 	// search free drawer 
 	for (auto& Drawer : AllDrawers)
 	{
-		if (!Drawer->IsValid())
+		if (Drawer->IsFree())
 		{
+			Drawer->MarkUsing();
 			return Drawer;
 		}
 	}
 
 	// create new drawer 
-	AllDrawers.Add(MakeShared<FRmlDrawer, ESPMode::ThreadSafe>());
+	AllDrawers.Add(MakeShared<FRmlDrawer, ESPMode::ThreadSafe>(true));
 	return AllDrawers.Top();
 }

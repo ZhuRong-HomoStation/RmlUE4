@@ -65,30 +65,32 @@ int32 SRmlWidget::OnPaint(
 
 	// get render interface
 	FUERmlRenderInterface* RenderInterface = (FUERmlRenderInterface*)Rml::GetRenderInterface();
-	
-	// set global info for call draw api 
-	RenderInterface->CurrentElementList = &OutDrawElements;
-	RenderInterface->CurrentLayer = LayerId;
 
-	// set render transform for translate clip rect 
-	RenderInterface->RmlWidgetRenderTransform = AllottedGeometry.GetAccumulatedRenderTransform();
+	// get render transform
+	auto RenderTransform = AllottedGeometry.GetAccumulatedRenderTransform();
 	
 	// rml local space -> slate render space 
-	RenderInterface->RmlRenderMatrix = RenderInterface->RmlWidgetRenderTransform.To3DMatrix();
+	FMatrix RenderMatrix(RenderTransform.To3DMatrix());
 
 	// slate render space -> NDC(Normalized Device Space)
 	FVector2D Size = OutDrawElements.GetPaintWindow()->GetSizeInScreen();;
-	RenderInterface->RmlRenderMatrix *= FMatrix(
+	RenderMatrix *= FMatrix(
 			FPlane(2.0f / Size.X,0.0f,			0.0f,		0.0f),
 			FPlane(0.0f,			-2.0f / Size.Y,	0.0f,		0.0f),
 			FPlane(0.0f,			0.0f,			1.f / 5000.f,0.0f),
 			FPlane(-1,			1,				0.5f,		1.0f));
 
-	// set viewport rect for compute clip rect 
-	RenderInterface->ViewportRect = MyCullingRect;
-
+	// begin render
+	RenderInterface->BeginRender(
+		RenderTransform ,
+		RenderMatrix ,
+		MyCullingRect);
+	
 	// call render api 
 	BoundContext->Render();
+
+	// post render
+	RenderInterface->EndRender(OutDrawElements, LayerId);
 
 	// next layer 
 	return LayerId + 1;

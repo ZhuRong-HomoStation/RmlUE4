@@ -13,7 +13,18 @@ public:
 	bool SetTexture(FString Path, UTexture* InTexture, bool bAddIfNotExist = true);
 	TSharedPtr<FRmlTextureEntry, ESPMode::ThreadSafe> GetTexture() { return AllTextures.begin().Value(); }
 	const TArray<TSharedPtr<FRmlTextureEntry, ESPMode::ThreadSafe>>& GetCreatedTextures() { return AllCreatedTextures; }
-	
+
+	void BeginRender(
+		    FSlateRenderTransform		InRmlWidgetRenderTransform ,
+		    const FMatrix&				InRmlRenderMatrix ,
+		    const FSlateRect&			InViewportRect)
+	{
+		RmlWidgetRenderTransform = InRmlWidgetRenderTransform;
+		RmlRenderMatrix = InRmlRenderMatrix;
+		ViewportRect = InViewportRect;
+		CurrentDrawer = _AllocDrawer();
+	}
+	void EndRender(FSlateWindowElementList&	InCurrentElementList, uint32 InCurrentLayer);
 protected:
 	// ~Begin Rml::RenderInterface API
 	virtual Rml::CompiledGeometryHandle CompileGeometry(
@@ -42,18 +53,19 @@ protected:
 	// ~End Rml::RenderInterface API
 
 	TSharedPtr<FRmlDrawer, ESPMode::ThreadSafe> _AllocDrawer();
-public:
-	FSlateWindowElementList*		CurrentElementList;
-	uint32							CurrentLayer;
+protected:
+	// render state 
 	FSlateRenderTransform			RmlWidgetRenderTransform;
 	FMatrix							RmlRenderMatrix;
 	FSlateRect						ViewportRect;
-protected:
-	FMatrix				AdditionRenderMatrix;
-	bool				bCustomMatrix;
-	bool				bUseClipRect;
-	FSlateRect			ClipRect;
-
+	TSharedPtr<FRmlDrawer, ESPMode::ThreadSafe>		CurrentDrawer;
+	
+	// internal state 
+	FMatrix							AdditionRenderMatrix;
+	bool							bCustomMatrix;
+	bool							bUseClipRect;
+	FSlateRect						ClipRect;
+	
 	// textures 
 	TMap<FString, TSharedPtr<FRmlTextureEntry, ESPMode::ThreadSafe>>	AllTextures;
 	TArray<TSharedPtr<FRmlTextureEntry, ESPMode::ThreadSafe>>			AllCreatedTextures;

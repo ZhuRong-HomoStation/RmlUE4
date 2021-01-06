@@ -4,8 +4,16 @@
 #include "RmlShader.h"
 #include "Render/TextureEntries.h"
 
+FRmlDrawer::FRmlDrawer(bool bUsing)
+	: bIsFree(!bUsing)
+{
+}
+
 void FRmlDrawer::DrawRenderThread(FRHICommandListImmediate& RHICmdList, const void* RenderTarget)
 {
+	// check thread 
+	check(IsInRenderingThread() || IsInParallelRenderingThread());
+	
 	// Get shader  
  	TShaderMapRef<FRmlShaderVs> Vs(GetGlobalShaderMap(ERHIFeatureLevel::SM5));
 	TShaderMapRef<FRmlShaderPs> Ps(GetGlobalShaderMap(ERHIFeatureLevel::SM5));
@@ -16,26 +24,64 @@ void FRmlDrawer::DrawRenderThread(FRHICommandListImmediate& RHICmdList, const vo
 	RHICmdList.ApplyCachedRenderTargets(PSOInitializer);
 	PSOInitializer.BoundShaderState.VertexDeclarationRHI = FRmlMesh::GetMeshDeclaration();
 	PSOInitializer.BoundShaderState.VertexShaderRHI = Vs.GetVertexShader();
-	PSOInitializer.BoundShaderState.PixelShaderRHI = BoundMesh->BoundTexture ? Ps.GetPixelShader() : PsNoTex.GetPixelShader();
+	PSOInitializer.BoundShaderState.PixelShaderRHI = Ps.GetPixelShader();
 	PSOInitializer.PrimitiveType = PT_TriangleList;
 	PSOInitializer.BlendState = TStaticBlendState<CW_RGBA, BO_Add, BF_SourceAlpha, BF_InverseSourceAlpha>::GetRHI();
 	PSOInitializer.RasterizerState = TStaticRasterizerState<>::GetRHI();
 	PSOInitializer.DepthStencilState = TStaticDepthStencilState<false, CF_Always>::GetRHI();
+	FGraphicsPipelineStateInitializer PSOInitializerNoTex;
+	RHICmdList.ApplyCachedRenderTargets(PSOInitializerNoTex);
+	PSOInitializerNoTex.BoundShaderState.VertexDeclarationRHI = FRmlMesh::GetMeshDeclaration();
+	PSOInitializerNoTex.BoundShaderState.VertexShaderRHI = Vs.GetVertexShader();
+	PSOInitializerNoTex.BoundShaderState.PixelShaderRHI = PsNoTex.GetPixelShader();
+	PSOInitializerNoTex.PrimitiveType = PT_TriangleList;
+	PSOInitializerNoTex.BlendState = TStaticBlendState<CW_RGBA, BO_Add, BF_SourceAlpha, BF_InverseSourceAlpha>::GetRHI();
+	PSOInitializerNoTex.RasterizerState = TStaticRasterizerState<>::GetRHI();
+	PSOInitializerNoTex.DepthStencilState = TStaticDepthStencilState<false, CF_Always>::GetRHI();
 
-	// Get PSO 
-	SetGraphicsPipelineState(RHICmdList, PSOInitializer);
-
-	// Set Params
-	Vs->SetParameters(RHICmdList, RenderTransform);
-	if (BoundMesh->BoundTexture)
+	// Draw elements
+	TSharedPtr<FRmlTextureEntry, ESPMode::ThreadSafe> CurTexture;
+	for (auto& DrawInfo : Info)
 	{
-		Ps->SetParameters(RHICmdList, Ps.GetPixelShader(), BoundMesh->BoundTexture->GetTextureRHI());
+		// Get new texture
+		auto NewTexture = DrawInfo.BoundMesh->BoundTexture;
+		
+		// Change texture 
+		if (NewTexture != CurTexture)
+		{
+			// Change PSO 
+			if (CurTexture.IsValid() != NewTexture.IsValid())
+			{
+				SetGraphicsPipelineState(
+					RHICmdList,
+					NewTexture.IsValid() ? PSOInitializer : PSOInitializerNoTex);
+			}
+
+			// Change texture
+			if (NewTexture.IsValid()) Ps->SetParameters(RHICmdList, Ps.GetPixelShader(), NewTexture->GetTextureRHI());
+
+			// Update current texture
+			CurTexture = NewTexture;
+		}
+
+		// Set transform 
+		Vs->SetParameters(RHICmdList, DrawInfo.RenderTransform);
+
+		// Set scissor rect
+		RHICmdList.SetScissorRect(
+			true,
+			DrawInfo.ScissorRect.Min.X,
+			DrawInfo.ScissorRect.Min.Y,
+			DrawInfo.ScissorRect.Max.X,
+			DrawInfo.ScissorRect.Max.Y);
+
+		// Render mesh
+		DrawInfo.BoundMesh->DrawMesh(RHICmdList);
 	}
 
-	// Draw 
-	RHICmdList.SetScissorRect(true, ScissorRect.Min.X, ScissorRect.Min.Y, ScissorRect.Max.X, ScissorRect.Max.Y);
-	BoundMesh->DrawMesh(RHICmdList);
-
-	// Reset self 
-	Reset();
+	// Reset draw info
+	Info.Reset();
+	
+	// Mark free
+	MarkFree();
 }
