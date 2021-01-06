@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "{7E7A74BA-4921-4D74-FE7E-329CA0D5D00A}",
+	"EngineAssociation": "{E06DF0C9-4EB0-9599-3541-9F8D965B3B7B}",
 	"Category": "",
 	"Description": "",
 	"Modules": [
@@ -8,6 +8,13 @@
 			"Name": "RmlUE4",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "ModuleGeneration",
+			"Enabled": true,
+			"MarketplaceURL": "https://www.unrealengine.com/marketplace/en-US/product/new-c-module-tool"
 		}
 	]
 }

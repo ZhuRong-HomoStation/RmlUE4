@@ -87,4 +87,7 @@ Config/steamvr_ue_editor_app.json
 !Plugins/RmlPlugin/Source/ThirdParty/RmlUI/Win/*/*/*.lib
 !Plugins/RmlPlugin/Source/ThirdParty/RmlUI/Win/*/*/*.dll
 
+# .idea is so tiresome 
+.idea
+
 Source/Noesis/NoesisSDK/*
