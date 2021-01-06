@@ -13,6 +13,9 @@ void FRmlDrawer::DrawRenderThread(FRHICommandListImmediate& RHICmdList, const vo
 {
 	// check thread 
 	check(IsInRenderingThread() || IsInParallelRenderingThread());
+
+	// early out
+	if (DrawList.Num() == 0) return;
 	
 	// Get shader  
  	TShaderMapRef<FRmlShaderVs> Vs(GetGlobalShaderMap(ERHIFeatureLevel::SM5));
@@ -38,10 +41,15 @@ void FRmlDrawer::DrawRenderThread(FRHICommandListImmediate& RHICmdList, const vo
 	PSOInitializerNoTex.BlendState = TStaticBlendState<CW_RGBA, BO_Add, BF_SourceAlpha, BF_InverseSourceAlpha>::GetRHI();
 	PSOInitializerNoTex.RasterizerState = TStaticRasterizerState<>::GetRHI();
 	PSOInitializerNoTex.DepthStencilState = TStaticDepthStencilState<false, CF_Always>::GetRHI();
-
+	
+	// Init pso
+	SetGraphicsPipelineState(
+                    RHICmdList,
+                    DrawList[0].BoundMesh->BoundTexture.IsValid() ? PSOInitializer : PSOInitializerNoTex);
+	
 	// Draw elements
-	TSharedPtr<FRmlTextureEntry, ESPMode::ThreadSafe> CurTexture;
-	for (auto& DrawInfo : Info)
+	TSharedPtr<FRmlTextureEntry, ESPMode::ThreadSafe> CurTexture = DrawList[0].BoundMesh->BoundTexture;
+	for (auto& DrawInfo : DrawList)
 	{
 		// Get new texture
 		auto NewTexture = DrawInfo.BoundMesh->BoundTexture;
@@ -80,7 +88,7 @@ void FRmlDrawer::DrawRenderThread(FRHICommandListImmediate& RHICmdList, const vo
 	}
 
 	// Reset draw info
-	Info.Reset();
+	DrawList.Reset();
 	
 	// Mark free
 	MarkFree();

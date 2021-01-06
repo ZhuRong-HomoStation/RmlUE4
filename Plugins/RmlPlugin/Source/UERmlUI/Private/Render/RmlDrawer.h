@@ -33,13 +33,13 @@ public:
 		const FMatrix& InRenderTransform ,
 		const FIntRect& InScissorRect)
 	{
-		Info.Emplace(InBoundMesh, InRenderTransform, InScissorRect);
+		DrawList.Emplace(InBoundMesh, InRenderTransform, InScissorRect);
 	}
 	
 	bool IsFree() const { return bIsFree; }
 	void MarkUsing() { bIsFree = false; }
 	void MarkFree() { bIsFree = true; }
 private:
-	TArray<FRmlMeshDrawInfo>		Info;
+	TArray<FRmlMeshDrawInfo>		DrawList;
 	bool							bIsFree;
 };
