@@ -74,10 +74,18 @@ void FUERmlSystemInterface::SetClipboardText(const Rml::String& text)
 
 void FUERmlSystemInterface::GetClipboardText(Rml::String& text)
 {
+	// read string 
 	FString Result;
 	FPlatformApplicationMisc::ClipboardPaste(Result);
-	Result.Reserve(FUTF8ToTCHAR_Convert::ConvertedLength(text.c_str(), text.length()) + 10);
-	FUTF8ToTCHAR_Convert::Convert(Result.GetCharArray().GetData(), Result.Len(), text.c_str(), text.length());
+
+	// compute Anis length 
+	auto AnisLen = FTCHARToUTF8_Convert::ConvertedLength(*Result, Result.Len());
+
+	// resize  
+	text.resize(AnisLen, '\0');
+
+	// copy data 
+	FTCHARToUTF8_Convert::Convert(const_cast<char*>(text.c_str()), text.size(), *Result, Result.Len());
 }
 
 void FUERmlSystemInterface::ActivateKeyboard()

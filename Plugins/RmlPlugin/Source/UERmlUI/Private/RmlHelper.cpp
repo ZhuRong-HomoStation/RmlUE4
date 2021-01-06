@@ -1,4 +1,5 @@
 #include "RmlHelper.h"
+#include "RmlUi/Core.h"
 #include "IImageWrapperModule.h"
 #include "IImageWrapper.h"
 
@@ -6,9 +7,7 @@ Rml::Input::KeyIdentifier FRmlHelper::ConvertKey(FKey InKey)
 {
 	static TMap<FKey, Rml::Input::KeyIdentifier> ConvertMap;
 	if (ConvertMap.Num() == 0)
-	{
-		ConvertMap.Add(EKeys::SpaceBar, Rml::Input::KeyIdentifier::KI_SPACE);
-		
+	{	
 		ConvertMap.Add(EKeys::Zero, Rml::Input::KeyIdentifier::KI_0);
 		ConvertMap.Add(EKeys::One, Rml::Input::KeyIdentifier::KI_1);
 		ConvertMap.Add(EKeys::Two, Rml::Input::KeyIdentifier::KI_2);
@@ -72,6 +71,9 @@ Rml::Input::KeyIdentifier FRmlHelper::ConvertKey(FKey InKey)
 		ConvertMap.Add(EKeys::F12, Rml::Input::KeyIdentifier::KI_F12);
 
 		ConvertMap.Add(EKeys::Enter, Rml::Input::KeyIdentifier::KI_NUMPADENTER);
+		ConvertMap.Add(EKeys::SpaceBar, Rml::Input::KeyIdentifier::KI_ESCAPE);
+		ConvertMap.Add(EKeys::Escape, Rml::Input::KeyIdentifier::KI_ESCAPE);
+		
 		ConvertMap.Add(EKeys::Multiply, Rml::Input::KeyIdentifier::KI_MULTIPLY);
 		ConvertMap.Add(EKeys::Add, Rml::Input::KeyIdentifier::KI_ADD);
 		ConvertMap.Add(EKeys::Subtract, Rml::Input::KeyIdentifier::KI_SUBTRACT);
@@ -82,12 +84,15 @@ Rml::Input::KeyIdentifier FRmlHelper::ConvertKey(FKey InKey)
 		ConvertMap.Add(EKeys::PageDown, Rml::Input::KeyIdentifier::KI_NEXT);
 		ConvertMap.Add(EKeys::End, Rml::Input::KeyIdentifier::KI_END);
 		ConvertMap.Add(EKeys::Home, Rml::Input::KeyIdentifier::KI_HOME);
+
 		ConvertMap.Add(EKeys::Left, Rml::Input::KeyIdentifier::KI_LEFT);
 		ConvertMap.Add(EKeys::Right, Rml::Input::KeyIdentifier::KI_RIGHT);
 		ConvertMap.Add(EKeys::Down, Rml::Input::KeyIdentifier::KI_DOWN);
 		ConvertMap.Add(EKeys::Up, Rml::Input::KeyIdentifier::KI_UP);
+		
 		ConvertMap.Add(EKeys::Insert, Rml::Input::KeyIdentifier::KI_INSERT);
 		ConvertMap.Add(EKeys::Delete, Rml::Input::KeyIdentifier::KI_DELETE);
+		ConvertMap.Add(EKeys::BackSpace, Rml::Input::KeyIdentifier::KI_BACK);
 		
 		ConvertMap.Add(EKeys::LeftShift, Rml::Input::KeyIdentifier::KI_LSHIFT);
 		ConvertMap.Add(EKeys::RightShift, Rml::Input::KeyIdentifier::KI_RSHIFT);
@@ -96,6 +101,7 @@ Rml::Input::KeyIdentifier FRmlHelper::ConvertKey(FKey InKey)
 
 		ConvertMap.Add(EKeys::NumLock, Rml::Input::KeyIdentifier::KI_NUMLOCK);
 		ConvertMap.Add(EKeys::ScrollLock, Rml::Input::KeyIdentifier::KI_SCROLL);
+		
 	}
 	auto FoundKey = ConvertMap.Find(InKey);
 	return FoundKey ? *FoundKey : Rml::Input::KeyIdentifier::KI_UNKNOWN;
