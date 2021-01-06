@@ -2,6 +2,11 @@
 
 class FRmlTextureEntry;
 
+namespace Rml
+{
+	struct Vertex;
+}
+
 class FRmlMesh : public TSharedFromThis<FRmlMesh, ESPMode::ThreadSafe>
 {
 public:
@@ -15,6 +20,7 @@ public:
 		{}
 	};
 
+	void Setup(Rml::Vertex* vertices, int num_vertices, int* indices, int num_indices, TSharedPtr<FRmlTextureEntry, ESPMode::ThreadSafe> InTexture);
 	void BuildMesh();
 	void ReleaseMesh();
 	void DrawMesh(FRHICommandList& RHICmdList);

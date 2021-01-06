@@ -11,7 +11,7 @@ void FRmlDrawer::DrawRenderThread(FRHICommandListImmediate& RHICmdList, const vo
 	TShaderMapRef<FRmlShaderPs> Ps(GetGlobalShaderMap(ERHIFeatureLevel::SM5));
 	TShaderMapRef<FRmlShaderPsNoTex> PsNoTex(GetGlobalShaderMap(ERHIFeatureLevel::SM5));
 	
-	// Set PSO 
+	// Set PSO info 
 	FGraphicsPipelineStateInitializer PSOInitializer;
 	RHICmdList.ApplyCachedRenderTargets(PSOInitializer);
 	PSOInitializer.BoundShaderState.VertexDeclarationRHI = FRmlMesh::GetMeshDeclaration();
@@ -21,7 +21,8 @@ void FRmlDrawer::DrawRenderThread(FRHICommandListImmediate& RHICmdList, const vo
 	PSOInitializer.BlendState = TStaticBlendState<CW_RGBA, BO_Add, BF_SourceAlpha, BF_InverseSourceAlpha>::GetRHI();
 	PSOInitializer.RasterizerState = TStaticRasterizerState<>::GetRHI();
 	PSOInitializer.DepthStencilState = TStaticDepthStencilState<false, CF_Always>::GetRHI();
-	
+
+	// Get PSO 
 	SetGraphicsPipelineState(RHICmdList, PSOInitializer);
 
 	// Set Params

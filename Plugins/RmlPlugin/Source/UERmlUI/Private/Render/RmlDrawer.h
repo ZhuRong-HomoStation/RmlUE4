@@ -2,6 +2,7 @@
 
 class FRmlMesh;
 
+// TODO: Batch draw 
 class FRmlDrawer : public ICustomSlateElement
 {
 public:
@@ -14,6 +15,5 @@ public:
 public:
 	TSharedPtr<FRmlMesh, ESPMode::ThreadSafe>	BoundMesh;
 	FMatrix										RenderTransform;
-	bool					bEnableScissorRect = false;
-	FIntRect				ScissorRect;
+	FIntRect									ScissorRect;
 };

@@ -3,8 +3,7 @@
 #include "Render/RmlDrawer.h"
 #include "Render/RmlMesh.h"
 #include "RmlUi/Core.h"
-#include "IImageWrapperModule.h"
-#include "IImageWrapper.h"
+#include "RmlHelper.h"
 
 FUERmlRenderInterface::FUERmlRenderInterface()
 	: AdditionRenderMatrix(FMatrix::Identity)
@@ -34,87 +33,81 @@ Rml::CompiledGeometryHandle FUERmlRenderInterface::CompileGeometry(
 	int num_indices,
 	Rml::TextureHandle texture)
 {
+	// create mesh 
 	TSharedPtr<FRmlMesh, ESPMode::ThreadSafe> Mesh = MakeShared<FRmlMesh, ESPMode::ThreadSafe>();
 
-	// copy vertices
-	Mesh->Vertices.SetNumUninitialized(num_vertices);
-	for (int i = 0; i < num_vertices; ++i)
-	{
-		auto& SourceVertex = vertices[i];
-		auto& VertexData = Mesh->Vertices[i];
-		VertexData.Color.X = SourceVertex.colour.red / 255.0;
-		VertexData.Color.Y = SourceVertex.colour.green / 255.0;
-		VertexData.Color.Z = SourceVertex.colour.blue / 255.0;
-		VertexData.Color.W = SourceVertex.colour.alpha / 255.0;
-		VertexData.Position.X = SourceVertex.position.x;
-		VertexData.Position.Y = SourceVertex.position.y;
-		VertexData.UV.X = SourceVertex.tex_coord.x;
-		VertexData.UV.Y = SourceVertex.tex_coord.y;
-	}
-
-	// copy indices
-	Mesh->Indices.SetNumUninitialized(num_indices);
-	for (int i = 0; i < num_indices; ++i)
-	{
-		Mesh->Indices[i] = (uint16)indices[i];
-	}
+	// setup
+	Mesh->Setup(
+		vertices,
+		num_vertices,
+		indices,
+		num_indices,
+		texture ?
+			reinterpret_cast<FRmlTextureEntry*>(texture)->AsShared() :
+			TSharedPtr<FRmlTextureEntry, ESPMode::ThreadSafe>());
 
 	// build mesh
 	Mesh->BuildMesh();
-
-	// set up texture
-	if (texture != NULL)
-	{
-		Mesh->BoundTexture = reinterpret_cast<FRmlTextureEntry*>(texture)->AsShared();
-	}
 	
 	// add to array
 	Meshes.Add(Mesh);
-	
+
+	// as handle 
 	return reinterpret_cast<Rml::CompiledGeometryHandle>(Mesh.Get());
 }
 
 void FUERmlRenderInterface::RenderCompiledGeometry(Rml::CompiledGeometryHandle geometry,
 	const Rml::Vector2f& translation)
 {
+	// check state 
 	check(CurrentElementList);
+
+	// get drawer 
 	auto Drawer = _AllocDrawer();
 
+	// get mesh 
 	Drawer->BoundMesh = reinterpret_cast<FRmlMesh*>(geometry)->AsShared();
-	if (bCustomMatrix)
-	{
-		Drawer->RenderTransform = FMatrix::Identity;
-		Drawer->RenderTransform.M[3][0] += translation.x;
-		Drawer->RenderTransform.M[3][1] += translation.y;
-		Drawer->RenderTransform *= AdditionRenderMatrix;
-		Drawer->RenderTransform *= RmlToWidgetMatrix;
-		Drawer->RenderTransform *= OrthoMatrix;
-	}
-	else
-	{
-		Drawer->RenderTransform = FMatrix::Identity;
-		Drawer->RenderTransform.M[3][0] = translation.x;
-		Drawer->RenderTransform.M[3][1] = translation.y;
-		Drawer->RenderTransform *= RmlToWidgetMatrix;
-		Drawer->RenderTransform *= OrthoMatrix;
-	}
-	Drawer->bEnableScissorRect = bUseClipRect;
+
+	// local space -> Rml space 
+	Drawer->RenderTransform.SetIdentity();
+	Drawer->RenderTransform.M[3][0] = translation.x;
+	Drawer->RenderTransform.M[3][1] = translation.y;
+
+	// addition matrix 
+	if (bCustomMatrix) { Drawer->RenderTransform *= AdditionRenderMatrix; }
+
+	// Rml space -> NDC(Normalized Device Space) 
+	Drawer->RenderTransform *= RmlRenderMatrix;
+
+	// set up clip rect 
 	if (bUseClipRect)
 	{
+		// transform rect to slate render space 
 		auto ClipRectAfterTrans = TransformRect(RmlWidgetRenderTransform, ClipRect);
+
+		// get intersection rect 
 		ClipRectAfterTrans = ClipRectAfterTrans.IntersectionWith(ViewportRect);
-		Drawer->ScissorRect = FIntRect(ClipRectAfterTrans.Left, ClipRectAfterTrans.Top, ClipRectAfterTrans.Right, ClipRectAfterTrans.Bottom);
+
+		// set up rect 
+		Drawer->ScissorRect = FIntRect(
+			FMath::RoundToInt(ClipRectAfterTrans.Left),
+			FMath::RoundToInt(ClipRectAfterTrans.Top),
+			FMath::RoundToInt(ClipRectAfterTrans.Right),
+			FMath::RoundToInt(ClipRectAfterTrans.Bottom));
 	}
 	else
 	{
+		// use screen scissor rect 
 		Drawer->ScissorRect = FIntRect(ViewportRect.Left, ViewportRect.Top, ViewportRect.Right, ViewportRect.Bottom);
 	}
-	
+
+	// call draw api 
 	FSlateDrawElement::MakeCustom(*CurrentElementList, CurrentLayer, Drawer);
 }
 
 void FUERmlRenderInterface::ReleaseCompiledGeometry(Rml::CompiledGeometryHandle geometry)
 {
+	// remove geometry 
 	Meshes.RemoveSwap(reinterpret_cast<FRmlMesh*>(geometry)->AsShared());
 }
 
@@ -125,89 +118,74 @@ bool FUERmlRenderInterface::LoadTexture(Rml::TextureHandle& texture_handle, Rml:
 	auto FoundTexture = AllTextures.Find(Path);
 	if (FoundTexture)
 	{
+		// setup handle 
 		texture_handle = reinterpret_cast<Rml::TextureHandle>((*FoundTexture).Get());
+
+		// setup size 
 		texture_dimensions.x = (*FoundTexture)->BoundTexture->GetSurfaceWidth();
 		texture_dimensions.y = (*FoundTexture)->BoundTexture->GetSurfaceHeight();
 		return true;
 	}
 	else
 	{
-		TArray<FString> PathNodes;
-		Path.ParseIntoArray(PathNodes, TEXT("/"));
-		if (PathNodes.Num() == 0) return false;
-		if (PathNodes[0].EndsWith(TEXT(":")) || PathNodes[0] == TEXT(".") || PathNodes[0] == TEXT(".."))
+		// load texture 
+		UTexture2D* LoadedTexture = nullptr;
+
+		// get root node 
+		FString RootNode;
+		Path.Split(TEXT("/"), &RootNode, nullptr);
+
+		// load texture 
+		if (RootNode.IsEmpty() || RootNode.EndsWith(TEXT(":")) || RootNode == TEXT(".") || RootNode == TEXT(".."))
 		{
-			TArray64<uint8> Data;
-			FFileHelper::LoadFileToArray(Data, *Path);
-			if (Data.Num() == 0) return false;
-
-			// load texture data 
-			static const FName MODULE_IMAGE_WRAPPER("ImageWrapper");
-			IImageWrapperModule& ImageWrapperModule = FModuleManager::LoadModuleChecked<IImageWrapperModule>(MODULE_IMAGE_WRAPPER);
-			EImageFormat ImageFormat = ImageWrapperModule.DetectImageFormat(Data.GetData(), Data.Num());
-			if (ImageFormat == EImageFormat::Invalid) return false;
-			TSharedPtr<IImageWrapper> ImageWrapper = ImageWrapperModule.CreateImageWrapper(ImageFormat);
-			if (!ImageWrapper->SetCompressed(Data.GetData(), Data.Num())) return false;
-			TArray64<uint8>* RawData = new TArray64<uint8>();
-			texture_dimensions.x = ImageWrapper->GetWidth();
-			texture_dimensions.y = ImageWrapper->GetHeight();
-			ImageWrapper->GetRaw(ERGBFormat::RGBA, 8, *RawData);
-
-			// create texture 
-			UTexture2D* LoadedTexture = UTexture2D::CreateTransient(texture_dimensions.x, texture_dimensions.y, EPixelFormat::PF_R8G8B8A8);
-			LoadedTexture->UpdateResource();
-			FUpdateTextureRegion2D* TextureRegion = new FUpdateTextureRegion2D(0, 0, 0, 0, texture_dimensions.x, texture_dimensions.y);
-			auto DataCleanup = [RawData](uint8* Data, const FUpdateTextureRegion2D* UpdateRegion)
-			{
-				delete RawData;
-				delete UpdateRegion;
-			};
-			LoadedTexture->UpdateTextureRegions(0, 1u, TextureRegion, 4 * texture_dimensions.x, 4, RawData->GetData(), DataCleanup);
-
-			// add to array 
-			auto& AddedTexture = AllTextures.Add(Path, MakeShared<FRmlTextureEntry, ESPMode::ThreadSafe>(LoadedTexture, Path));
-			texture_handle = reinterpret_cast<Rml::TextureHandle>(AddedTexture.Get());
-			return true;
+			LoadedTexture = FRmlHelper::LoadTextureFromFile(Path);
 		}
 		else
 		{
-			UObject* LoadedObj = StaticLoadObject(UTexture2D::StaticClass(), GetTransientPackage(), nullptr, *Path);
-			if (!LoadedObj) return false;
-			auto& AddedTexture = AllTextures.Add(Path, MakeShared<FRmlTextureEntry, ESPMode::ThreadSafe>((UTexture*)LoadedObj, Path));
-			texture_handle = reinterpret_cast<Rml::TextureHandle>(AddedTexture.Get());
-			texture_dimensions.x = AddedTexture->BoundTexture->GetSurfaceWidth();
-			texture_dimensions.y = AddedTexture->BoundTexture->GetSurfaceHeight();			
-			return true;
+			LoadedTexture = FRmlHelper::LoadTextureFromAsset(Path);
 		}
+
+		// load failed
+		if (!LoadedTexture) return false;
+
+		// add to array 
+		auto& AddedTexture = AllTextures.Add(Path, MakeShared<FRmlTextureEntry, ESPMode::ThreadSafe>(LoadedTexture, Path));
+
+		// setup handle 
+		texture_handle = reinterpret_cast<Rml::TextureHandle>(AddedTexture.Get());
+
+		// setup size 
+		texture_dimensions.x = LoadedTexture->GetSurfaceWidth();
+		texture_dimensions.y = LoadedTexture->GetSurfaceHeight();			
+		return true;
 	}
 	
-	return false;
+	return true;
 }
 
 bool FUERmlRenderInterface::GenerateTexture(Rml::TextureHandle& texture_handle, const Rml::byte* source,
 	const Rml::Vector2i& source_dimensions)
 {
-	UTexture2D* Texture = UTexture2D::CreateTransient(source_dimensions.x, source_dimensions.y, EPixelFormat::PF_R8G8B8A8);
-	Texture->UpdateResource();
-	FUpdateTextureRegion2D* TextureRegion = new FUpdateTextureRegion2D(0, 0, 0, 0, source_dimensions.x, source_dimensions.y);
-	int32 Size = source_dimensions.x * source_dimensions.y * 4;
-	uint8* Data = new uint8[Size];
-	FMemory::Memcpy(Data, source, Size);	
-	auto DataCleanup = [](uint8* Data, const FUpdateTextureRegion2D* UpdateRegion)
-	{
-		delete Data;
-		delete UpdateRegion;
-	};
-	Texture->UpdateTextureRegions(0, 1u, TextureRegion, 4 * source_dimensions.x, 4, Data, DataCleanup);
+	// load texture 
+	UTexture2D* Texture = FRmlHelper::LoadTextureFromRaw(
+		(const uint8*)source,
+		FIntPoint(source_dimensions.x, source_dimensions.y));
 
+	// add to created array 
 	AllCreatedTextures.Add(MakeShared<FRmlTextureEntry, ESPMode::ThreadSafe>(Texture));
+
+	// set handle 
 	texture_handle = reinterpret_cast<Rml::TextureHandle>(AllCreatedTextures.Top().Get());
+
 	return true;
 }
 
 void FUERmlRenderInterface::ReleaseTexture(Rml::TextureHandle texture)
 {
+	// to entry 
 	FRmlTextureEntry* Entry = reinterpret_cast<FRmlTextureEntry*>(texture);
+
+	// release 
 	if (Entry->TexturePath.IsEmpty())
 	{
 		AllCreatedTextures.RemoveSwap(Entry->AsShared());
@@ -240,6 +218,7 @@ void FUERmlRenderInterface::RenderGeometry(
 	Rml::TextureHandle texture,
 	const Rml::Vector2f& translation)
 {
+	// we only use compile mode 
 	checkNoEntry();
 }
 
@@ -258,6 +237,7 @@ void FUERmlRenderInterface::SetScissorRegion(int x, int y, int width, int height
 
 TSharedPtr<FRmlDrawer, ESPMode::ThreadSafe> FUERmlRenderInterface::_AllocDrawer()
 {
+	// search free drawer 
 	for (auto& Drawer : AllDrawers)
 	{
 		if (!Drawer->IsValid())
@@ -265,6 +245,8 @@ TSharedPtr<FRmlDrawer, ESPMode::ThreadSafe> FUERmlRenderInterface::_AllocDrawer(
 			return Drawer;
 		}
 	}
+
+	// create new drawer 
 	AllDrawers.Add(MakeShared<FRmlDrawer, ESPMode::ThreadSafe>());
 	return AllDrawers.Top();
 }

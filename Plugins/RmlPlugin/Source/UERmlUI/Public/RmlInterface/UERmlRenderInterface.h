@@ -46,8 +46,6 @@ public:
 	FSlateWindowElementList*		CurrentElementList;
 	uint32							CurrentLayer;
 	FSlateRenderTransform			RmlWidgetRenderTransform;
-	FMatrix							RmlToWidgetMatrix;
-	FMatrix							OrthoMatrix;
 	FMatrix							RmlRenderMatrix;
 	FSlateRect						ViewportRect;
 protected:

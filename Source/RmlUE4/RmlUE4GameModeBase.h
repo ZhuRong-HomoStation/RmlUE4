@@ -2,6 +2,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
 #include "SRmlWidget.h"
+#include "RmlInterface/UERmlRenderInterface.h"
+#include "RmlInterface/UERmlSystemInterface.h"
 #include "RmlUE4GameModeBase.generated.h"
 
 UCLASS()
@@ -15,5 +17,8 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 private:
-	TSharedPtr<SRmlWidget>		RmlWidget;
+	FUERmlSystemInterface			RmlSystemInterface;
+	FUERmlRenderInterface			RmlRenderInterface;
+	Rml::Context*			Context;
+	Rml::ElementDocument*	Document;
 };

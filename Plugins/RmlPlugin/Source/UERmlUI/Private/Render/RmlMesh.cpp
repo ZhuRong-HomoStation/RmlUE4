@@ -1,4 +1,39 @@
 ﻿#include "RmlMesh.h"
+#include "RmlUi/Core/Vertex.h"
+
+void FRmlMesh::Setup(
+	Rml::Vertex* vertices,
+	int num_vertices,
+	int* indices,
+	int num_indices,
+	TSharedPtr<FRmlTextureEntry, ESPMode::ThreadSafe> InTexture)
+{
+	// copy vertices
+	Vertices.SetNumUninitialized(num_vertices);
+	for (int i = 0; i < num_vertices; ++i)
+	{
+		auto& SourceVertex = vertices[i];
+		auto& VertexData = Vertices[i];
+		VertexData.Color.X = SourceVertex.colour.red / 255.0;
+		VertexData.Color.Y = SourceVertex.colour.green / 255.0;
+		VertexData.Color.Z = SourceVertex.colour.blue / 255.0;
+		VertexData.Color.W = SourceVertex.colour.alpha / 255.0;
+		VertexData.Position.X = SourceVertex.position.x;
+		VertexData.Position.Y = SourceVertex.position.y;
+		VertexData.UV.X = SourceVertex.tex_coord.x;
+		VertexData.UV.Y = SourceVertex.tex_coord.y;
+	}
+
+	// copy indices
+	Indices.SetNumUninitialized(num_indices);
+	for (int i = 0; i < num_indices; ++i)
+	{
+		Indices[i] = (uint16)indices[i];
+	}
+
+	// set up texture
+	BoundTexture = InTexture;
+}
 
 void FRmlMesh::BuildMesh()
 {
