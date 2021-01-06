@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "RmlUi/Core/SystemInterface.h"
+#include "RmlUi/Core.h"
 
 class UERMLUI_API FUERmlSystemInterface : public Rml::SystemInterface
 {

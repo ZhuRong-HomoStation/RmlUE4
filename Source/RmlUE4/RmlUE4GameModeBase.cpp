@@ -1,7 +1,8 @@
 #include "RmlUE4GameModeBase.h"
-#include <sstream>
-#include "RmlUi/Core/StreamMemory.h"
 #include "Widgets/Images/SImage.h"
+#include <sstream>
+
+#include "Kismet/KismetSystemLibrary.h"
 
 
 ARmlUE4GameModeBase::ARmlUE4GameModeBase()
@@ -12,7 +13,7 @@ ARmlUE4GameModeBase::ARmlUE4GameModeBase()
 void ARmlUE4GameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	// setup interface 
 	Rml::SetSystemInterface(&RmlSystemInterface);
 	Rml::SetRenderInterface(&RmlRenderInterface);
@@ -33,7 +34,7 @@ void ARmlUE4GameModeBase::BeginPlay()
 	Context = Rml::CreateContext("Test Context", Rml::Vector2i());
 
 	// load document
-	FString DocPath = FPaths::ProjectContentDir() / TEXT("RmlAssets/assets/demo.rml");
+	FString DocPath = FPaths::ConvertRelativePathToFull(FPaths::ProjectContentDir() / TEXT("RmlAssets/assets/demo.rml"));
 	Document = Context->LoadDocument(TCHAR_TO_UTF8(*DocPath));
 
 	// show document 

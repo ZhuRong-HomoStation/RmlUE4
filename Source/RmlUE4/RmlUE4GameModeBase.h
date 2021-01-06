@@ -2,6 +2,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
 #include "SRmlWidget.h"
+#include "RmlUi/Core.h"
 #include "RmlInterface/UERmlRenderInterface.h"
 #include "RmlInterface/UERmlSystemInterface.h"
 #include "RmlUE4GameModeBase.generated.h"

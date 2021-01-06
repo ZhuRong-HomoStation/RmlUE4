@@ -21,7 +21,6 @@ public:
 	// widget functional 
 	bool AddToViewport(UWorld* InWorld, int32 ZOrder = 0);
 	bool RemoveFromParent(UWorld* InWorld);
-	void UpdateParentWnd();
 	
 	void Context(Rml::Context* InContext) { BoundContext = InContext; }
 	Rml::Context* Context() const { return BoundContext; }
@@ -47,5 +46,4 @@ private:
 	bool					bEnableRml;
 	Rml::Context*			BoundContext;
 	FUERmlRenderInterface*	RenderInterface;
-	TWeakPtr<SWindow>		ParentWnd;
 };

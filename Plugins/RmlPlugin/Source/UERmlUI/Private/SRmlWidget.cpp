@@ -2,6 +2,7 @@
 #include "RmlHelper.h"
 #include "Widgets/Images/SImage.h"
 #include "Widgets/Layout/SConstraintCanvas.h"
+#include "RmlUi/Core.h"
 
 void SRmlWidget::Construct(const FArguments& InArgs)
 {
@@ -19,9 +20,6 @@ bool SRmlWidget::AddToViewport(UWorld* InWorld, int32 ZOrder)
 	// add to view port 
 	ViewportClient->AddViewportWidgetContent(this->AsShared(), ZOrder + 10);
 	
-	// update parent wnd
-	UpdateParentWnd();
-	
 	return true;
 }
 
@@ -35,16 +33,6 @@ bool SRmlWidget::RemoveFromParent(UWorld* InWorld)
 	ViewportClient->RemoveViewportWidgetContent(this->AsShared());
 
 	return true;
-}
-
-void SRmlWidget::UpdateParentWnd()
-{
-	SWidget* Widget = this;
-	while (!Widget->Advanced_IsWindow())
-	{
-		Widget = Widget->GetParentWidget().Get();
-	}
-	ParentWnd = StaticCastSharedRef<SWindow>(Widget->AsShared());
 }
 
 void SRmlWidget::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
@@ -73,8 +61,8 @@ int32 SRmlWidget::OnPaint(
 	const FWidgetStyle& InWidgetStyle,
 	bool bParentEnabled) const
 {
-	if (!bEnableRml || !BoundContext || !ParentWnd.IsValid() || !RenderInterface) return LayerId;
-
+	if (!bEnableRml || !BoundContext || !RenderInterface) return LayerId;
+	
 	// set global info for call draw api 
 	RenderInterface->CurrentElementList = &OutDrawElements;
 	RenderInterface->CurrentLayer = LayerId;
@@ -85,8 +73,8 @@ int32 SRmlWidget::OnPaint(
 	// rml local space -> slate render space 
 	RenderInterface->RmlRenderMatrix = RenderInterface->RmlWidgetRenderTransform.To3DMatrix();
 
-	// slate render space -> NDC(Normalized Device Space) 
-	FVector2D Size = ParentWnd.Pin()->GetSizeInScreen();
+	// slate render space -> NDC(Normalized Device Space)
+	FVector2D Size = OutDrawElements.GetPaintWindow()->GetSizeInScreen();;
 	RenderInterface->RmlRenderMatrix *= FMatrix(
 			FPlane(2.0f / Size.X,0.0f,			0.0f,		0.0f),
 			FPlane(0.0f,			-2.0f / Size.Y,	0.0f,		0.0f),
