@@ -75,17 +75,17 @@ Intermediate/*
 DerivedDataCache/*
 
 # Plugin binaries and temp files 
-Plugins/RmlPlugin/Binaries/*
-Plugins/RmlPlugin/Intermediate/*
+Plugins/UERmlUI/Binaries/*
+Plugins/UERmlUI/Intermediate/*
 
 # We won't use VR
 Config/steamVRBindings/*
 Config/steamvr_ue_editor_app.json
 
 # Don't ignore binary in Thirdparty
-!Plugins/RmlPlugin/Source/ThirdParty/RmlUI/*
-!Plugins/RmlPlugin/Source/ThirdParty/RmlUI/Win/*/*/*.lib
-!Plugins/RmlPlugin/Source/ThirdParty/RmlUI/Win/*/*/*.dll
+!Plugins/UERmlUI/Source/ThirdParty/RmlUI/*
+!Plugins/UERmlUI/Source/ThirdParty/RmlUI/Win/*/*/*.lib
+!Plugins/UERmlUI/Source/ThirdParty/RmlUI/Win/*/*/*.dll
 
 # .idea is so tiresome 
 .idea

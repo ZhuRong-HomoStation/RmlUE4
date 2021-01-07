@@ -43,9 +43,13 @@ void FRmlDrawer::DrawRenderThread(FRHICommandListImmediate& RHICmdList, const vo
 	PSOInitializerNoTex.DepthStencilState = TStaticDepthStencilState<false, CF_Always>::GetRHI();
 	
 	// Init pso
-	SetGraphicsPipelineState(
-                    RHICmdList,
-                    DrawList[0].BoundMesh->BoundTexture.IsValid() ? PSOInitializer : PSOInitializerNoTex);
+	{
+		auto FirstTexture = DrawList[0].BoundMesh->BoundTexture;
+		SetGraphicsPipelineState(
+	                    RHICmdList,
+	                   FirstTexture.IsValid() ? PSOInitializer : PSOInitializerNoTex);
+		if (FirstTexture.IsValid()) Ps->SetParameters(RHICmdList, Ps.GetPixelShader(), FirstTexture->GetTextureRHI());
+	}
 	
 	// Draw elements
 	TSharedPtr<FRmlTextureEntry, ESPMode::ThreadSafe> CurTexture = DrawList[0].BoundMesh->BoundTexture;

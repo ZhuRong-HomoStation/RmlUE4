@@ -11,8 +11,8 @@ public:
 	void StartupModule() override
 	{
 		// register shader dictionary 
-		FString ShaderDir = FPaths::Combine(IPluginManager::Get().FindPlugin(TEXT("RmlPlugin"))->GetBaseDir(),TEXT("Shaders"));
-		AddShaderSourceDirectoryMapping(TEXT("/Plugin/RmlPlugin"), ShaderDir);
+		FString ShaderDir = FPaths::Combine(IPluginManager::Get().FindPlugin(TEXT("UERmlUI"))->GetBaseDir(),TEXT("Shaders"));
+		AddShaderSourceDirectoryMapping(TEXT("/Plugin/UERmlUI"), ShaderDir);
 	}
 	void ShutdownModule() override
 	{
