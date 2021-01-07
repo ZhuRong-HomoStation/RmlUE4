@@ -2,6 +2,18 @@
 <head>
 	<link type="text/rcss" href="rml.rcss"/>
 	<link type="text/rcss" href="invader.rcss"/>
+	<style>
+		body.window
+		{
+			margin: auto;
+			width: 80%;
+			height: 80%;
+			min-width: 1030px;
+			min-height: 300px;
+			max-width: -1px;
+			max-height: -1px;
+		}
+	</style>
 </head>
 <body class="window">
 	<div id="title_bar">

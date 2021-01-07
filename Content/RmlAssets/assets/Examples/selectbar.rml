@@ -151,13 +151,14 @@
 				transition: background-color transform 0.6s sine-in-out;
 				background-color: rgb(160,40,56);
 			}
-			ul.btnContainer
+			div.btnContainer
 			{
 				display: block;
 				position: absolute;
 				width: 80%;
 				margin: auto;
 				top: 50%;
+				font-family: Delicious;
 				transform: translateY(-50%);
 			}
 			button,
@@ -198,9 +199,9 @@
 		</style>
 	</head>
 	<body>
-		<ul id="DemoList" class="btnContainer">
-			<li><button onclick="Controller:OpenDemo">Demo</button></li>;
-			<li><button onclick="Controller:OpenBenchMark">Benchmark</button></li>;
-		</ul>
+		<div id="DemoList" class="btnContainer">
+			<button onclick="Controller:OpenDemo">Demo</button>
+			<button onclick="Controller:OpenBenchMark">Benchmark</button>
+		</div>
 	</body>
 </rml>

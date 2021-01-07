@@ -36,16 +36,6 @@
 	demo-title-bar: 147px 0px 96px 85px;
 }
 
-body.window
-{
-	margin: auto;
-	width: 80%;
-	height: 80%;
-	min-width: 1030px;
-	min-height: 300px;
-	max-width: -1px;
-	max-height: -1px;
-}
 div#title_bar div#icon
 {
 	display: none;

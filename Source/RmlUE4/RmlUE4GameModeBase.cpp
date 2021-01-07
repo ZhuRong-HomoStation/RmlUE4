@@ -100,7 +100,7 @@ void ARmlUE4GameModeBase::_LoadDemos(const FString& InBasePath)
 	// main demo 
 	MainDemo = NewObject<URmlDemo>(this);
 	MainDemo->Init(Context, InBasePath + TEXT("demo.rml"));
-
+	
 	// benchmark
 	BenchMark = NewObject<URmlBenchmark>(this);
 	BenchMark->Init(Context, InBasePath + TEXT("benchmark.rml"));
@@ -110,7 +110,7 @@ void ARmlUE4GameModeBase::_ChangeShowItem(URmlDocument* InDocument)
 {
 	if (CurrentElement == BenchMark)
 	{
-		BenchMark->bDoPerformanceTest = true;
+		BenchMark->bDoPerformanceTest = false;
 	}
 	
 	if (CurrentElement) CurrentElement->GetDocument()->Hide();

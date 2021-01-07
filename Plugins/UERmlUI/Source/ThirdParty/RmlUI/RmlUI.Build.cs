@@ -14,7 +14,7 @@ public class RmlUI : ModuleRules
 		PrivateDependencyModuleNames.AddRange(new string[]
 		{
 			"Core" ,
-			"freetype2" ,
+			"FreeType2" ,
 		});
 		
 		// RML ui need RTTI
