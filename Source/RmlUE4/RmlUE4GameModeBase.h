@@ -2,6 +2,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
 #include "SRmlWidget.h"
+#include "Examples/RmlDemo.h"
 #include "RmlUi/Core.h"
 #include "RmlInterface/UERmlRenderInterface.h"
 #include "RmlInterface/UERmlSystemInterface.h"
@@ -20,6 +21,8 @@ public:
 private:
 	FUERmlSystemInterface			RmlSystemInterface;
 	FUERmlRenderInterface			RmlRenderInterface;
-	Rml::Context*			Context;
-	Rml::ElementDocument*	Document;
+	Rml::Context*					Context;
+	
+	UPROPERTY()
+	URmlDemo*						Demo;
 };

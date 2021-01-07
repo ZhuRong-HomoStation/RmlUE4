@@ -70,8 +70,8 @@ Rml::Input::KeyIdentifier FRmlHelper::ConvertKey(FKey InKey)
 		ConvertMap.Add(EKeys::F11, Rml::Input::KeyIdentifier::KI_F11);
 		ConvertMap.Add(EKeys::F12, Rml::Input::KeyIdentifier::KI_F12);
 
-		ConvertMap.Add(EKeys::Enter, Rml::Input::KeyIdentifier::KI_NUMPADENTER);
-		ConvertMap.Add(EKeys::SpaceBar, Rml::Input::KeyIdentifier::KI_ESCAPE);
+		ConvertMap.Add(EKeys::Enter, Rml::Input::KeyIdentifier::KI_RETURN);
+		ConvertMap.Add(EKeys::SpaceBar, Rml::Input::KeyIdentifier::KI_SPACE);
 		ConvertMap.Add(EKeys::Escape, Rml::Input::KeyIdentifier::KI_ESCAPE);
 		
 		ConvertMap.Add(EKeys::Multiply, Rml::Input::KeyIdentifier::KI_MULTIPLY);

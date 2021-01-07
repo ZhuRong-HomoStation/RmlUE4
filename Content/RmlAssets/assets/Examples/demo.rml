@@ -1,6 +1,6 @@
 <rml>
 <head>
-<link type="text/template" href="window.rml"/>
+<link type="text/template" href="../window.rml"/>
 <title>Demo Sample</title>
 <style>
 @spritesheet demo-sheet
@@ -528,9 +528,9 @@ progressbar {
 }
 #sandbox textarea
 {
-	font-size: 13px;
+	font-size: 20px;
 	color: #222;
-	font-family: rmlui-debugger-font;
+	font-family: Delicious;
 	box-sizing: border-box;
 	width: 50%;
 	height: 40%;

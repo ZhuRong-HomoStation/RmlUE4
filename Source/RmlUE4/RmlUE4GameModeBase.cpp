@@ -1,11 +1,13 @@
 #include "RmlUE4GameModeBase.h"
 #include "Widgets/Images/SImage.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include <sstream>
 
-#include "Kismet/KismetSystemLibrary.h"
+#include "RmlUi/Debugger/Debugger.h"
 
 
 ARmlUE4GameModeBase::ARmlUE4GameModeBase()
+	: Demo(nullptr)
 {
 	PrimaryActorTick.bCanEverTick = true;
 }
@@ -33,12 +35,22 @@ void ARmlUE4GameModeBase::BeginPlay()
 	// create context 
 	Context = Rml::CreateContext("Test Context", Rml::Vector2i());
 
+	// setup context 
+	Context->SetDensityIndependentPixelRatio(1.0f);
+
+	// init debugger 
+	// Rml::Debugger::Initialise(Context);
+
+	// show debugger 
+	// Rml::Debugger::SetVisible(true);
+	
 	// load document
-	FString DocPath = FPaths::ConvertRelativePathToFull(FPaths::ProjectContentDir() / TEXT("RmlAssets/assets/demo.rml"));
-	Document = Context->LoadDocument(TCHAR_TO_UTF8(*DocPath));
+	FString DocPath = FPaths::ConvertRelativePathToFull(FPaths::ProjectContentDir() / TEXT("RmlAssets/assets/Examples/demo.rml"));
+	Demo = NewObject<URmlDemo>(this);
+	Demo->Init(Context, DocPath);
 
 	// show document 
-	Document->Show();
+	Demo->GetDocument()->Show();
 
 	// create widget 
 	auto RmlWidget = SNew(SRmlWidget)
@@ -67,6 +79,10 @@ void ARmlUE4GameModeBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
+	// shut down documents
+	Demo->ShutDown();
+	Demo = nullptr;
+	
 	// release context
 	Rml::RemoveContext("Test Context");
 	Context = nullptr;

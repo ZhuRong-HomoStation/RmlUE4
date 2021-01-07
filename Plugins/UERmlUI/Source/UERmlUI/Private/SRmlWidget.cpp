@@ -122,11 +122,20 @@ FReply SRmlWidget::OnKeyChar(const FGeometry& MyGeometry, const FCharacterEvent&
 {
 	if (!bEnableRml || !BoundContext) return FReply::Unhandled();
 
+	// get input character  
+	TCHAR Ch = InCharacterEvent.GetCharacter();
+
+	// process windows new line 
+	if (Ch == TEXT('\r'))
+	{
+		return BoundContext->ProcessTextInput(Rml::Character(TEXT('\n'))) ? FReply::Unhandled() : FReply::Handled();
+	}
+	
 	// filter control character input 
-	if (!FChar::IsPrint(InCharacterEvent.GetCharacter())) return FReply::Unhandled();
+	if (!FChar::IsPrint(Ch)) return FReply::Unhandled();
 	
 	// reroute Character input
-	return BoundContext->ProcessTextInput(Rml::Character(InCharacterEvent.GetCharacter())) ? FReply::Unhandled() : FReply::Handled();
+	return BoundContext->ProcessTextInput(Rml::Character(Ch)) ? FReply::Unhandled() : FReply::Handled();
 }
 
 FReply SRmlWidget::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
