@@ -2,6 +2,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
 #include "SRmlWidget.h"
+#include "Examples/RmlBenchmark.h"
 #include "Examples/RmlDemo.h"
 #include "RmlUi/Core.h"
 #include "RmlInterface/UERmlRenderInterface.h"
@@ -19,10 +20,30 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 private:
+	void _LoadDemos(const FString& InBasePath);
+	void _ChangeShowItem(URmlDocument* InDocument);
+	
+	// !Begin Event
+	UFUNCTION()
+	void OpenDemo() { _ChangeShowItem(MainDemo); }
+	UFUNCTION()
+    void OpenBenchMark() { _ChangeShowItem(BenchMark); }
+	
+	// !End Event 
+private:
 	FUERmlSystemInterface			RmlSystemInterface;
 	FUERmlRenderInterface			RmlRenderInterface;
 	Rml::Context*					Context;
+
+	UPROPERTY()
+	URmlDocument*					DemoSelector;
+
+	UPROPERTY()
+	URmlDemo*						MainDemo;
+
+	UPROPERTY()
+	URmlBenchmark*					BenchMark;
 	
 	UPROPERTY()
-	URmlDemo*						Demo;
+	URmlDocument*					CurrentElement;
 };

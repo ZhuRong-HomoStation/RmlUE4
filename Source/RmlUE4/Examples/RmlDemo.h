@@ -8,7 +8,6 @@ class URmlDemo : public URmlDocument
 {
 	GENERATED_BODY()
 public:
-
 protected:
 	// ~Begin URmlDocument API
 	virtual void OnInit() override;

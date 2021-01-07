@@ -26,10 +26,14 @@ bool URmlDocument::Init(Rml::Context* InCtx, const FString& InDocPath)
 	// unregister event listener instancer 
 	Rml::Factory::RegisterEventListenerInstancer(nullptr);
 
+	// listen key info
+	BoundDocument->AddEventListener(Rml::EventId::Keydown, this);
+	BoundDocument->AddEventListener(Rml::EventId::Keyup, this);
+
 	// setup context
 	BoundContext = InCtx;
 	
-	this->OnInit();
+	OnInit();
 
 	return true;
 }
@@ -44,12 +48,22 @@ void URmlDocument::ShutDown()
 	}
 }
 
-void URmlDocument::OnInit()
-{
-}
-
 void URmlDocument::ProcessEvent(Rml::Event& event)
 {
+	// key down event
+	if (event == "keydown")
+	{
+		CurrentEvent = &event;
+		OnKeyDown();
+		return;
+	}
+	else if (event == "keyup")
+	{
+		CurrentEvent = &event;
+		OnKeyUp();
+		return;
+	}
+	
 	// get event name 
 	FString EventName(event.GetCurrentElement()->GetAttribute("on" + event.GetType())->Get(Rml::String()).c_str());
 

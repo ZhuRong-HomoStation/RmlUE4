@@ -1,13 +1,12 @@
 #include "RmlUE4GameModeBase.h"
 #include "Widgets/Images/SImage.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include <sstream>
-
 #include "RmlUi/Debugger/Debugger.h"
+#include <sstream>
 
 
 ARmlUE4GameModeBase::ARmlUE4GameModeBase()
-	: Demo(nullptr)
+	: MainDemo(nullptr)
 {
 	PrimaryActorTick.bCanEverTick = true;
 }
@@ -30,7 +29,7 @@ void ARmlUE4GameModeBase::BeginPlay()
 	Rml::LoadFontFace(TCHAR_TO_UTF8(*(FontPath + TEXT("Delicious-Italic.otf"))));
 	Rml::LoadFontFace(TCHAR_TO_UTF8(*(FontPath + TEXT("Delicious-Roman.otf"))));
 	Rml::LoadFontFace(TCHAR_TO_UTF8(*(FontPath + TEXT("NotoEmoji-Regular.ttf"))), true);
-	Rml::LoadFontFace(TCHAR_TO_UTF8(*(FontPath + TEXT("STKAITI.TTF"))));
+	Rml::LoadFontFace(TCHAR_TO_UTF8(*(FontPath + TEXT("STKAITI.TTF"))), true);
 	
 	// create context 
 	Context = Rml::CreateContext("Test Context", Rml::Vector2i());
@@ -44,14 +43,15 @@ void ARmlUE4GameModeBase::BeginPlay()
 	// show debugger 
 	// Rml::Debugger::SetVisible(true);
 	
-	// load document
-	FString DocPath = FPaths::ConvertRelativePathToFull(FPaths::ProjectContentDir() / TEXT("RmlAssets/assets/Examples/demo.rml"));
-	Demo = NewObject<URmlDemo>(this);
-	Demo->Init(Context, DocPath);
+	// load demo selector 
+	FString BasePath = FPaths::ConvertRelativePathToFull(FPaths::ProjectContentDir() / TEXT("RmlAssets/assets/Examples/"));
+	DemoSelector = NewObject<URmlDocument>(this);
+	DemoSelector->Init(Context, BasePath + TEXT("selectbar.rml"));
+	DemoSelector->Show();
 
-	// show document 
-	Demo->GetDocument()->Show();
-
+	// load demos
+	_LoadDemos(BasePath);
+	
 	// create widget 
 	auto RmlWidget = SNew(SRmlWidget)
 	.InitContext(Context);
@@ -80,8 +80,9 @@ void ARmlUE4GameModeBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 
 	// shut down documents
-	Demo->ShutDown();
-	Demo = nullptr;
+	DemoSelector->ShutDown();
+	MainDemo->ShutDown();
+	BenchMark->ShutDown();
 	
 	// release context
 	Rml::RemoveContext("Test Context");
@@ -89,4 +90,35 @@ void ARmlUE4GameModeBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 	// shut down rml environment 
 	Rml::Shutdown();
+}
+
+void ARmlUE4GameModeBase::_LoadDemos(const FString& InBasePath)
+{
+	// setup notify object 
+	DemoSelector->SetNotifyObject(TEXT("Controller"), this);
+
+	// main demo 
+	MainDemo = NewObject<URmlDemo>(this);
+	MainDemo->Init(Context, InBasePath + TEXT("demo.rml"));
+
+	// benchmark
+	BenchMark = NewObject<URmlBenchmark>(this);
+	BenchMark->Init(Context, InBasePath + TEXT("benchmark.rml"));
+}
+
+void ARmlUE4GameModeBase::_ChangeShowItem(URmlDocument* InDocument)
+{
+	if (CurrentElement == BenchMark)
+	{
+		BenchMark->bDoPerformanceTest = true;
+	}
+	
+	if (CurrentElement) CurrentElement->GetDocument()->Hide();
+	InDocument->GetDocument()->Show();
+	CurrentElement = InDocument;
+
+	if (InDocument == BenchMark)
+	{
+		BenchMark->bDoPerformanceTest = true;
+	}
 }

@@ -19,8 +19,18 @@ public:
 	void ShutDown();
 
 	Rml::ElementDocument* GetDocument() const { return BoundDocument; }
+
+	UFUNCTION()
+	void Show() { BoundDocument->Show(); }
+
+	UFUNCTION()
+	void Hide() { BoundDocument->Hide(); }
+	
+	void SetNotifyObject(const FString& InName, UObject* InObject) { EventNotifyMap.Add(InName, InObject); }
 protected:
-	virtual void OnInit();
+	virtual void OnInit() {}
+	virtual void OnKeyDown() {}
+	virtual void OnKeyUp() {}
 protected:
 	// ~Begin Rml::EventListener API 
 	virtual void ProcessEvent(Rml::Event& event) override;
