@@ -39,7 +39,7 @@ OutputPS RmlShader_PS(OutputVS In)
 	OutputPS Out;
 
 	Out.Color = In.Color * InTexture.Sample(InTextureSampler, In.UV);
-
+	
 	return Out;
 }
 

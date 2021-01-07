@@ -134,12 +134,8 @@ bool FUERmlRenderInterface::LoadTexture(Rml::TextureHandle& texture_handle, Rml:
 		// load texture 
 		UTexture2D* LoadedTexture = nullptr;
 
-		// get root node 
-		FString RootNode;
-		Path.Split(TEXT("/"), &RootNode, nullptr);
-
 		// load texture 
-		if (RootNode.IsEmpty() || RootNode.EndsWith(TEXT(":")) || RootNode == TEXT(".") || RootNode == TEXT(".."))
+		if (FPlatformFileManager::Get().GetPlatformFile().FileExists(*Path))
 		{
 			LoadedTexture = FRmlHelper::LoadTextureFromFile(Path);
 		}

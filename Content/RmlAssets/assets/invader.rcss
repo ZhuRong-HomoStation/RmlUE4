@@ -1,6 +1,6 @@
 @spritesheet theme 
 {
-	src: invader.png;
+	src: /Game/Texture/invader.invader;
 	
 	/**
 	   The following specifies a list of sprite names and associated rectangles into the image given above.

@@ -5,7 +5,7 @@
 <style>
 @spritesheet demo-sheet
 {
-	src: invader.png;
+	src: /Game/Texture/invader.invader;
 	
 	window-outer: 0px 0px 144px 151px;
 	
@@ -158,7 +158,7 @@ p.title
 {
 	width: 64px;
 	height: 64px;
-	decorator: image( ./high_scores_alien_1.png );
+	decorator: image( /Game/Texture/high_scores_alien_1.high_scores_alien_1 );
 }
 #decorators .image-invader
 {
@@ -681,16 +681,16 @@ progressbar {
 
 	<h1>Image elements</h1>
 	<div class="center">
-		<img src="high_scores_defender.png" class="clickable" onclick="change_color"/>
+		<img src="/Game/Texture/high_scores_defender.high_scores_defender" class="clickable" onclick="change_color"/>
 		<img sprite="icon-game" style="vertical-align: 10px;"/>
-		<img src="high_scores_defender.png" style="image-color: #fc5;" rect="0 0 64 64"/>
-		<img src="high_scores_defender.png" style="image-color: #9c5;" rect="64 0 64 64"/>
+		<img src="/Game/Texture/high_scores_defender.high_scores_defender" style="image-color: #fc5;" rect="0 0 64 64"/>
+		<img src="/Game/Texture/high_scores_defender.high_scores_defender" style="image-color: #9c5;" rect="64 0 64 64"/>
 	</div>
 	<p>The 'img' elements are separate from decorators, but we describe them here for completeness. They can be declared as in html. Additionally, a 'rect' attribute can be used to crop the image. The element can also display sprites declared in a sprite sheet.</p>
 	
 	<h1>Sprite sheets</h1>
 	<p>Sprite sheets are defined by an image source and a collection of sprites, and can be declared in RCSS. Sprites are essentially rectangles into the given image. For example, the following image</p>
-	<img src="invader.png" rect="0 0 500 435" style="margin-top: 10px; margin-bottom: 10px;"/>
+	<img src="/Game/Texture/invader.invader" rect="0 0 500 435" style="margin-top: 10px; margin-bottom: 10px;"/>
 	<p>is used to render most sprites in this demo. Sprites can be used in decorators and image elements as if they were separate images.</p>
 </panel>
 <tab>Font effects</tab>
@@ -718,10 +718,10 @@ progressbar {
 	<h1>Transitions</h1>
 	<p>Hover over the following to see an animation performed by the transition property in RCSS.</p>
 	<div id="transition">
-		<img class="alien alien1" src="high_scores_alien_1.png"/>
-		<img class="alien alien2" src="high_scores_alien_2.png"/>
-		<img class="alien alien3" src="high_scores_alien_3.png"/>
-		<div class="ray"><img class="defender" src="high_scores_defender.png"/></div>
+		<img class="alien alien1" src="/Game/Texture/high_scores_alien_1.high_scores_alien_1"/>
+		<img class="alien alien2" src="/Game/Texture/high_scores_alien_2.high_scores_alien_2"/>
+		<img class="alien alien3" src="/Game/Texture/high_scores_alien_3.high_scores_alien_3"/>
+		<div class="ray"><img class="defender" src="/Game/Texture/high_scores_defender.high_scores_defender"/></div>
 		<div style="height: 110%;"/>
 	</div>
 	

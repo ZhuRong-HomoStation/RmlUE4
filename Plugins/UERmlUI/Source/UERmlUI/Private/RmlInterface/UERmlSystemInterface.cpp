@@ -1,6 +1,7 @@
 ﻿#include "RmlInterface/UERmlSystemInterface.h"
 #include "Logging.h"
 #include "HAL/PlatformApplicationMisc.h"
+#include "RmlUi/Core/URL.h"
 
 FUERmlSystemInterface::FUERmlSystemInterface()
 	: CachedCursor(EMouseCursor::Default)
@@ -12,32 +13,43 @@ double FUERmlSystemInterface::GetElapsedTime()
 	return FSlateApplication::Get().GetCurrentTime();
 }
 
-void FUERmlSystemInterface::JoinPath(
-	Rml::String& translated_path,
-	const Rml::String& document_path,
+void FUERmlSystemInterface::JoinPath(Rml::String& translated_path, const Rml::String& document_path,
 	const Rml::String& path)
 {
-	Super::JoinPath(translated_path, document_path, path);
-	return;
+	using namespace Rml;
 	
-	FString Path(path.c_str());
-
-	FString FirstNode;
-	Path.Split(TEXT("/"), &FirstNode, nullptr);
-
-	if (FirstNode.IsEmpty() || FirstNode.EndsWith(TEXT(":")) || FirstNode == TEXT("..") || FirstNode == TEXT("."))
-	{
-		FString DocPath(document_path.c_str());
-		int32 Index;
-		DocPath.FindLastChar(TEXT('/'), Index);
-		DocPath.LeftInline(Index + 1);
-		FString ResultPath = FPaths::Combine(DocPath, Path);
-		translated_path = TCHAR_TO_UTF8(*ResultPath);		
-	}
-	else
+	// If the path is absolute, return it directly.
+	if (path.size() > 0 && path[0] == '/')
 	{
 		translated_path = path;
+		return;
 	}
+
+	// If the path is a Windows-style absolute path, return it directly.
+	size_t drive_pos = path.find(':');
+	size_t slash_pos = Math::Min(path.find('/'), path.find('\\'));
+	if (drive_pos != String::npos &&
+        drive_pos < slash_pos)
+	{
+		translated_path = path;
+		return;
+	}
+
+	using StringUtilities::Replace;
+
+	// Strip off the referencing document name.
+	translated_path = document_path;
+	translated_path = Replace(translated_path, '\\', '/');
+	size_t file_start = translated_path.rfind('/');
+	if (file_start != String::npos)
+		translated_path.resize(file_start + 1);
+	else
+		translated_path.clear();
+
+	// Append the paths and send through URL to removing any '..'.
+	int begin_pos = (path[0] == '.' && path[1] == '/') ? 2 : 0;
+	URL url(Replace(translated_path, ':', '|') + Replace(path.substr(begin_pos), '\\', '/'));
+	translated_path = Replace(url.GetPathedFileName(), '|', ':');
 }
 
 bool FUERmlSystemInterface::LogMessage(Rml::Log::Type type, const Rml::String& message)

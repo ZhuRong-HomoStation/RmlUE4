@@ -212,7 +212,7 @@ UTexture2D* FRmlHelper::LoadTextureFromFile(const FString& InFilePath)
 
 UTexture2D* FRmlHelper::LoadTextureFromAsset(const FString& InAssetPath, UObject* InOuter)
 {
-	UObject* LoadedObj = StaticLoadObject(UTexture2D::StaticClass(), InOuter, nullptr, *InAssetPath);
+	UObject* LoadedObj = StaticLoadObject(UObject::StaticClass(), InOuter, *InAssetPath);
 	return LoadedObj ? (UTexture2D*)LoadedObj : nullptr;
 }
 
