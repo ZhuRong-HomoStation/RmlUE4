@@ -14,6 +14,8 @@ public class RmlUI : ModuleRules
 		PrivateDependencyModuleNames.AddRange(new string[]
 		{
 			"Core" ,
+			"UElibPNG" ,
+			"zlib" ,
 			"FreeType2" ,
 		});
 		
