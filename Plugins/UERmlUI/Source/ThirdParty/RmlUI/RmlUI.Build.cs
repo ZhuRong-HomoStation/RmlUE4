@@ -14,9 +14,9 @@ public class RmlUI : ModuleRules
 		PrivateDependencyModuleNames.AddRange(new string[]
 		{
 			"Core" ,
-			"UElibPNG" ,
-			"zlib" ,
-			"FreeType2" ,
+			"UElibPNG" ,	// depended by freetype 
+			"zlib" ,		// depended by freetype 
+			"FreeType2" ,	// use free type lib 
 		});
 		
 		// RML ui need RTTI
@@ -44,5 +44,8 @@ public class RmlUI : ModuleRules
 		
 		// Disable freetype(font) 
 		// PrivateDefinitions.Add("RMLUI_NO_FONT_INTERFACE_DEFAULT");
+		
+		// Enable lua 
+		// PrivateDefinitions.Add("RMLUI_BUILD_LUA");
 	}
 }

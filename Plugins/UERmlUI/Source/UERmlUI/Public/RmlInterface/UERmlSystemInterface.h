@@ -8,7 +8,6 @@ public:
 	FUERmlSystemInterface();
 
 	EMouseCursor::Type CachedCursorState() const { return CachedCursor; }
-	
 protected:
 	// ~Begin Rml::SystemInterface API 
 	virtual double GetElapsedTime() override;
