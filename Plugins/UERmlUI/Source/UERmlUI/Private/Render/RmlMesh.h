@@ -13,10 +13,10 @@ public:
 	struct FVertexData
 	{
 		FVector2D	Position;
+		FColor		Color;
 		FVector2D	UV;
-		FVector4	Color;
-		FVertexData(const FVector2D& InPos, const FVector2D& InUV, const FVector4& InColor)
-			: Position(InPos), UV(InUV), Color(InColor)
+		FVertexData(const FVector2D& InPos, const FVector2D& InUV, const FColor& InColor)
+			: Position(InPos), Color(InColor), UV(InUV)
 		{}
 	};
 

@@ -10,19 +10,7 @@ void FRmlMesh::Setup(
 {
 	// copy vertices
 	Vertices.SetNumUninitialized(num_vertices);
-	for (int i = 0; i < num_vertices; ++i)
-	{
-		auto& SourceVertex = vertices[i];
-		auto& VertexData = Vertices[i];
-		VertexData.Color.X = SourceVertex.colour.red / 255.0;
-		VertexData.Color.Y = SourceVertex.colour.green / 255.0;
-		VertexData.Color.Z = SourceVertex.colour.blue / 255.0;
-		VertexData.Color.W = SourceVertex.colour.alpha / 255.0;
-		VertexData.Position.X = SourceVertex.position.x;
-		VertexData.Position.Y = SourceVertex.position.y;
-		VertexData.UV.X = SourceVertex.tex_coord.x;
-		VertexData.UV.Y = SourceVertex.tex_coord.y;
-	}
+	FMemory::Memcpy(Vertices.GetData(), vertices, sizeof(Rml::Vertex) * num_vertices);
 
 	// copy indices
 	Indices.SetNumUninitialized(num_indices);
@@ -76,7 +64,7 @@ FVertexDeclarationRHIRef FRmlMesh::GetMeshDeclaration()
 		uint16 Stride = sizeof(FVertexData);
 		Elements.Add(FVertexElement(0,STRUCT_OFFSET(FVertexData,Position),VET_Float2,0,Stride));
 		Elements.Add(FVertexElement(0,STRUCT_OFFSET(FVertexData,UV),VET_Float2,1,Stride));
-		Elements.Add(FVertexElement(0,STRUCT_OFFSET(FVertexData,Color),VET_Float4,2,Stride));
+		Elements.Add(FVertexElement(0,STRUCT_OFFSET(FVertexData,Color),VET_UByte4N,2,Stride));
 		VertexDeclarationRHI = PipelineStateCache::GetOrCreateVertexDeclaration(Elements);
 	}
 	return VertexDeclarationRHI;

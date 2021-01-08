@@ -36,6 +36,7 @@ public class RmlUI : ModuleRules
 		{
 			"RmlCore_EXPORTS" ,
 			"RmlDebugger_EXPORTS" ,
+			"_CRT_SECURE_NO_WARNINGS" ,	// Disable scanf warning 
 		});
 
 		// Disable warning 
