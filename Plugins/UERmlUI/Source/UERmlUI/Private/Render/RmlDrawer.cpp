@@ -89,7 +89,7 @@ void FRmlDrawer::DrawRenderThread(FRHICommandListImmediate& RHICmdList, const vo
 
 		// Set scissor rect
 		RHICmdList.SetScissorRect(
-			false,
+			true,
 			DrawInfo.ScissorRect.Min.X,
 			DrawInfo.ScissorRect.Min.Y,
 			DrawInfo.ScissorRect.Max.X,
