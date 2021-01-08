@@ -26,9 +26,6 @@ public:
 	void DrawMesh(FRHICommandList& RHICmdList);
 
 	static FVertexDeclarationRHIRef GetMeshDeclaration();
-private:
-	void BuildMesh_RenderThread();
-
 public:
 	TResourceArray<FVertexData>		Vertices;
 	FVertexBufferRHIRef				VertexBufferRHI;
