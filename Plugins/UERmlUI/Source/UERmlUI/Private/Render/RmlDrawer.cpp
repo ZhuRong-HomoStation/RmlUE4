@@ -1,4 +1,5 @@
 ﻿#include "RmlDrawer.h"
+#include "ClearQuad.h"
 #include "Logging.h"
 #include "RmlMesh.h"
 #include "RmlShader.h"
@@ -14,6 +15,13 @@ void FRmlDrawer::DrawRenderThread(FRHICommandListImmediate& RHICmdList, const vo
 	// check thread 
 	check(IsInRenderingThread() || IsInParallelRenderingThread());
 
+	// get render target 
+	FTexture2DRHIRef* RT = (FTexture2DRHIRef*)RenderTarget;
+
+	// clear render target 
+	FRHIRenderPassInfo RPInfo(*RT, ERenderTargetActions::DontLoad_Store);
+	RHICmdList.BeginRenderPass(RPInfo, TEXT("DrawRmlMesh"));
+	
 	// early out
 	if (DrawList.Num() == 0) return;
 	
@@ -40,7 +48,7 @@ void FRmlDrawer::DrawRenderThread(FRHICommandListImmediate& RHICmdList, const vo
 	PSOInitializerNoTex.PrimitiveType = PT_TriangleList;
 	PSOInitializerNoTex.BlendState = TStaticBlendState<CW_RGBA, BO_Add, BF_SourceAlpha, BF_InverseSourceAlpha>::GetRHI();
 	PSOInitializerNoTex.RasterizerState = TStaticRasterizerState<>::GetRHI();
-	PSOInitializerNoTex.DepthStencilState = TStaticDepthStencilState<false, CF_Always>::GetRHI();
+	PSOInitializerNoTex.DepthStencilState = TStaticDepthStencilState<false, CF_Always, false, CF_Always>::GetRHI();
 	
 	// Init pso
 	{
@@ -81,7 +89,7 @@ void FRmlDrawer::DrawRenderThread(FRHICommandListImmediate& RHICmdList, const vo
 
 		// Set scissor rect
 		RHICmdList.SetScissorRect(
-			true,
+			false,
 			DrawInfo.ScissorRect.Min.X,
 			DrawInfo.ScissorRect.Min.Y,
 			DrawInfo.ScissorRect.Max.X,
@@ -90,10 +98,12 @@ void FRmlDrawer::DrawRenderThread(FRHICommandListImmediate& RHICmdList, const vo
 		// Render mesh
 		DrawInfo.BoundMesh->DrawMesh(RHICmdList);
 	}
-
+	
 	// Reset draw info
 	DrawList.Reset();
 	
 	// Mark free
 	MarkFree();
+	
+	RHICmdList.EndRenderPass();
 }
