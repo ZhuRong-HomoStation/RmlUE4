@@ -73,7 +73,7 @@ int32 SRmlWidget::OnPaint(
 	FMatrix RenderMatrix(RenderTransform.To3DMatrix());
 
 	// slate render space -> NDC(Normalized Device Space)
-	FVector2D Size = OutDrawElements.GetPaintWindow()->GetSizeInScreen();;
+	FVector2D Size = OutDrawElements.GetPaintWindow()->GetSizeInScreen();
 	RenderMatrix *= FMatrix(
 			FPlane(2.0f / Size.X,0.0f,			0.0f,		0.0f),
 			FPlane(0.0f,			-2.0f / Size.Y,	0.0f,		0.0f),

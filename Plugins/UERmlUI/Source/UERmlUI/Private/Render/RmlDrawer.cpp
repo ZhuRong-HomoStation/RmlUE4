@@ -14,21 +14,26 @@ void FRmlDrawer::DrawRenderThread(FRHICommandListImmediate& RHICmdList, const vo
 {
 	// check thread 
 	check(IsInRenderingThread() || IsInParallelRenderingThread());
+	
+	// early out
+	if (DrawList.Num() == 0)
+	{
+		MarkFree();
+		return;
+	}
 
 	// get render target 
 	FTexture2DRHIRef* RT = (FTexture2DRHIRef*)RenderTarget;
 
-	// clear render target 
-	FRHIRenderPassInfo RPInfo(*RT, ERenderTargetActions::DontLoad_Store);
+	// begin pass 
+	FRHIRenderPassInfo RPInfo(*RT, ERenderTargetActions::Load_Store);
 	RHICmdList.BeginRenderPass(RPInfo, TEXT("DrawRmlMesh"));
 	
-	// early out
-	if (DrawList.Num() == 0) return;
-	
-	// Get shader  
- 	TShaderMapRef<FRmlShaderVs> Vs(GetGlobalShaderMap(ERHIFeatureLevel::SM5));
-	TShaderMapRef<FRmlShaderPs> Ps(GetGlobalShaderMap(ERHIFeatureLevel::SM5));
-	TShaderMapRef<FRmlShaderPsNoTex> PsNoTex(GetGlobalShaderMap(ERHIFeatureLevel::SM5));
+	// Get shader
+	auto ShaderMap = GetGlobalShaderMap(ERHIFeatureLevel::SM5);
+ 	TShaderMapRef<FRmlShaderVs> Vs(ShaderMap);
+	TShaderMapRef<FRmlShaderPs> Ps(ShaderMap);
+	TShaderMapRef<FRmlShaderPsNoTex> PsNoTex(ShaderMap);
 	
 	// Set PSO info 
 	FGraphicsPipelineStateInitializer PSOInitializer;
@@ -51,16 +56,15 @@ void FRmlDrawer::DrawRenderThread(FRHICommandListImmediate& RHICmdList, const vo
 	PSOInitializerNoTex.DepthStencilState = TStaticDepthStencilState<false, CF_Always, false, CF_Always>::GetRHI();
 	
 	// Init pso
+	TSharedPtr<FRmlTextureEntry, ESPMode::ThreadSafe> CurTexture = DrawList[0].BoundMesh->BoundTexture;
 	{
-		auto FirstTexture = DrawList[0].BoundMesh->BoundTexture;
 		SetGraphicsPipelineState(
 	                    RHICmdList,
-	                   FirstTexture.IsValid() ? PSOInitializer : PSOInitializerNoTex);
-		if (FirstTexture.IsValid()) Ps->SetParameters(RHICmdList, Ps.GetPixelShader(), FirstTexture->GetTextureRHI());
+	                   CurTexture.IsValid() ? PSOInitializer : PSOInitializerNoTex);
+		if (CurTexture.IsValid()) Ps->SetParameters(RHICmdList, Ps.GetPixelShader(), CurTexture->GetTextureRHI());
 	}
 	
 	// Draw elements
-	TSharedPtr<FRmlTextureEntry, ESPMode::ThreadSafe> CurTexture = DrawList[0].BoundMesh->BoundTexture;
 	for (auto& DrawInfo : DrawList)
 	{
 		// Get new texture
